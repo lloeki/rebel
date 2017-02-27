@@ -35,3 +35,13 @@ What you write is what you meant: tasty and delicious
 Wait, it doesn't execute!?
 Just use your fave client gem, isn't that cute?
 ```
+
+## License
+
+MIT
+
+## Caveat
+
+This is totes not secure in any fscking way you could ever imagine, and this is
+valid for every single definition of *secure* you could ever think of (and even
+the ones you don't).
