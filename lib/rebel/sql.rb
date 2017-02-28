@@ -6,11 +6,11 @@ module Rebel::SQL
   end
 
   def create_table(table_name, desc)
-    exec(SQL.create_table(table_name, desc))
+    exec(Rebel::SQL.create_table(table_name, desc))
   end
 
   def select(*fields, from: nil, where: nil, inner: nil, left: nil, right: nil)
-    exec(SQL.select(*fields,
+    exec(Rebel::SQL.select(*fields,
                     from: from,
                     where: where,
                     inner: inner,
@@ -19,36 +19,36 @@ module Rebel::SQL
   end
 
   def insert_into(table_name, *rows)
-    exec(SQL.insert_into(table_name, *rows))
+    exec(Rebel::SQL.insert_into(table_name, *rows))
   end
 
   def update(table_name, set: nil, where: nil, inner: nil, left: nil, right: nil)
-    exec(SQL.update(table_name, set: set, where: where, inner: inner, left: left, right: right))
+    exec(Rebel::SQL.update(table_name, set: set, where: where, inner: inner, left: left, right: right))
   end
 
   def delete_from(table_name, where: nil, inner: nil, left: nil, right: nil)
-    exec(SQL.delete_from(table_name, where: where, inner: inner, left: left, right: right))
+    exec(Rebel::SQL.delete_from(table_name, where: where, inner: inner, left: left, right: right))
   end
 
   def truncate(table_name)
-    exec(SQL.truncate(table_name))
+    exec(Rebel::SQL.truncate(table_name))
   end
 
   def count(*n)
-    SQL.count(*n)
+    Rebel::SQL.count(*n)
   end
 
   def join(table, on: nil)
-    SQL.join(table, on: on)
+    Rebel::SQL.join(table, on: on)
   end
 
   def outer_join(table, on: nil)
-    SQL.outer_join(table, on: on)
+    Rebel::SQL.outer_join(table, on: on)
   end
 
   class Raw < String
     def as(n)
-      Raw.new(self + " AS #{SQL.name(n)}")
+      Raw.new(self + " AS #{Rebel::SQL.name(n)}")
     end
 
     def as?(n)
@@ -56,7 +56,7 @@ module Rebel::SQL
     end
 
     def on(clause)
-      Raw.new(self + " ON #{SQL.and_clause(clause)}")
+      Raw.new(self + " ON #{Rebel::SQL.and_clause(clause)}")
     end
 
     def on?(clause)
@@ -71,8 +71,8 @@ module Rebel::SQL
 
     def create_table(table_name, desc)
       <<-SQL
-      CREATE TABLE #{SQL.name(table_name)} (
-        #{SQL.list(desc.map { |k, v| "#{SQL.name(k)} #{v}" })}
+      CREATE TABLE #{Rebel::SQL.name(table_name)} (
+        #{Rebel::SQL.list(desc.map { |k, v| "#{Rebel::SQL.name(k)} #{v}" })}
       );
       SQL
     end
@@ -80,17 +80,17 @@ module Rebel::SQL
     def select(*fields, from: nil, where: nil, inner: nil, left: nil, right: nil)
       <<-SQL
       SELECT #{names(*fields)} FROM #{name(from)}
-      #{SQL.inner?(inner)}
-      #{SQL.left?(left)}
-      #{SQL.right?(right)}
-      #{SQL.where?(where)};
+      #{Rebel::SQL.inner?(inner)}
+      #{Rebel::SQL.left?(left)}
+      #{Rebel::SQL.right?(right)}
+      #{Rebel::SQL.where?(where)};
       SQL
     end
 
     def insert_into(table_name, *rows)
       <<-SQL
-      INSERT INTO #{SQL.name(table_name)} (#{SQL.names(*rows.first.keys)})
-      VALUES #{SQL.list(rows.map { |r| "(#{SQL.values(*r.values)})" })};
+      INSERT INTO #{Rebel::SQL.name(table_name)} (#{Rebel::SQL.names(*rows.first.keys)})
+      VALUES #{Rebel::SQL.list(rows.map { |r| "(#{Rebel::SQL.values(*r.values)})" })};
       SQL
     end
 
@@ -98,28 +98,28 @@ module Rebel::SQL
       fail ArgumentError if set.nil?
 
       <<-SQL
-      UPDATE #{SQL.name(table_name)}
-      SET #{SQL.assign_clause(set)}
-      #{SQL.inner?(inner)}
-      #{SQL.left?(left)}
-      #{SQL.right?(right)}
-      #{SQL.where?(where)};
+      UPDATE #{Rebel::SQL.name(table_name)}
+      SET #{Rebel::SQL.assign_clause(set)}
+      #{Rebel::SQL.inner?(inner)}
+      #{Rebel::SQL.left?(left)}
+      #{Rebel::SQL.right?(right)}
+      #{Rebel::SQL.where?(where)};
       SQL
     end
 
     def delete_from(table_name, where: nil, inner: nil, left: nil, right: nil)
       <<-SQL
-      DELETE FROM #{SQL.name(table_name)}
-      #{SQL.inner?(inner)}
-      #{SQL.left?(left)}
-      #{SQL.right?(right)}
-      #{SQL.where?(where)};
+      DELETE FROM #{Rebel::SQL.name(table_name)}
+      #{Rebel::SQL.inner?(inner)}
+      #{Rebel::SQL.left?(left)}
+      #{Rebel::SQL.right?(right)}
+      #{Rebel::SQL.where?(where)};
       SQL
     end
 
     def truncate(table_name)
       <<-SQL
-      TRUNCATE #{SQL.name(table_name)};
+      TRUNCATE #{Rebel::SQL.name(table_name)};
       SQL
     end
 
@@ -195,7 +195,7 @@ module Rebel::SQL
     def where?(clause)
       return "WHERE #{clause}" if clause.is_a?(Raw) || clause.is_a?(String)
 
-      (clause && clause.any?) ? "WHERE #{SQL.and_clause(clause)}" : nil
+      (clause && clause.any?) ? "WHERE #{Rebel::SQL.and_clause(clause)}" : nil
     end
 
     def inner?(join)
