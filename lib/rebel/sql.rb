@@ -192,12 +192,21 @@ module Rebel::SQL
       list(clause.map { |k, v| equal(k, v) })
     end
 
+    def clause_term(left, right)
+      case right
+      when Array
+        "#{name(left)} IN (#{values(*right)})"
+      else
+        "#{name(left)} = #{name_or_value(right)}"
+      end
+    end
+
     def and_clause(clause)
       return clause if clause.is_a?(Raw) || clause.is_a?(String)
 
       clause.map do |e|
         case e
-        when Array then "#{name(e[0])} = #{name_or_value(e[1])}"
+        when Array then clause_term(e[0], e[1])
         when Raw, String then e
         else fail NotImplementedError, e.class
         end
