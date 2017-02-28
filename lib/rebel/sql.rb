@@ -137,6 +137,18 @@ module Rebel::SQL
       raw("OUTER JOIN #{name(table)}").on?(on)
     end
 
+    def inner_join(table, on: nil)
+      raw(inner? join(table, on: on))
+    end
+
+    def left_outer_join(table, on: nil)
+      raw(left? outer_join(table, on: on))
+    end
+
+    def right_outer_join(table, on: nil)
+      raw(right? outer_join(table, on: on))
+    end
+
     ## Support
 
     def name(name)
