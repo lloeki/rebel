@@ -158,7 +158,7 @@ module Rebel::SQL
       case v
       when Raw then v
       when String then raw "'#{v.tr("'", "''")}'"
-      when Fixnum then raw v.to_s
+      when Fixnum, Bignum, Integer then raw v.to_s
       when nil then raw 'NULL'
       else fail NotImplementedError, v.inspect
       end
