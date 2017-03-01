@@ -58,4 +58,8 @@ class TestRaw < Minitest::Test
     assert_str_equal(Rebel::SQL.where?(Rebel::SQL.name(:foo).eq(1).or(Rebel::SQL.name(:bar).eq(2)), Rebel::SQL.name(:baz).eq(3)), 'WHERE ("foo" = 1 OR "bar" = 2) AND "baz" = 3')
     assert_str_equal(Rebel::SQL.where?(Rebel::SQL.name(:foo).eq(1).or(Rebel::SQL.name(:bar).eq(2))), 'WHERE "foo" = 1 OR "bar" = 2')
   end
+
+  def test_join
+    assert_str_equal(Rebel::SQL.join(:foo), 'JOIN "foo"')
+  end
 end
