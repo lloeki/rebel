@@ -51,6 +51,20 @@ module Rebel::SQL
   end
 
   class Raw < String
+    def wants_parens!
+      @wants_parens = true
+      self
+    end
+
+    def wants_parens?
+      @wants_parens = false unless instance_variable_defined?(:@wants_parens)
+      @wants_parens
+    end
+
+    def parens
+      Raw.new("(#{self})")
+    end
+
     def as(n)
       Raw.new(self + " AS #{Rebel::SQL.name(n)}")
     end
@@ -72,7 +86,7 @@ module Rebel::SQL
     end
 
     def or(clause)
-      Raw.new("#{self} OR #{Rebel::SQL.and_clause(clause)}")
+      Raw.new("#{self} OR #{Rebel::SQL.and_clause(clause)}").wants_parens!
     end
 
     def eq(n)
@@ -257,28 +271,25 @@ module Rebel::SQL
     def clause_term(left, right)
       case right
       when Array
-        "#{name(left)} IN (#{values(*right)})"
+        name(left).in(*right)
       else
-        "#{name(left)} = #{name_or_value(right)}"
+        name(left).eq(name_or_value(right))
       end
     end
 
-    def and_clause(clause)
-      return clause if clause.is_a?(Raw) || clause.is_a?(String)
-
+    def and_clause(*clause)
       clause.map do |e|
         case e
         when Array then clause_term(e[0], e[1])
-        when Raw, String then e
+        when Raw then e.wants_parens? && clause.count > 1 ? "(#{e})" : e
+        when String then e
         else raise NotImplementedError, e.class
         end
       end.join(' AND ')
     end
 
-    def where?(clause)
-      return "WHERE #{clause}" if clause.is_a?(Raw) || clause.is_a?(String)
-
-      clause && clause.any? ? "WHERE #{Rebel::SQL.and_clause(clause)}" : nil
+    def where?(*clause)
+      clause.any? ? "WHERE #{Rebel::SQL.and_clause(*clause)}" : nil
     end
 
     def inner?(join)
