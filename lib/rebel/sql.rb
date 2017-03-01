@@ -296,6 +296,7 @@ module Rebel::SQL
     def and_clause(*clause)
       clause.map do |e|
         case e
+        when Hash then and_clause(*e.to_a)
         when Array then clause_term(e[0], e[1])
         when Raw then e.wants_parens? && clause.count > 1 ? "(#{e})" : e
         when String then e
