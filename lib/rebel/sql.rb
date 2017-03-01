@@ -267,6 +267,7 @@ module Rebel::SQL
       when Raw then v
       when String then raw "'#{escape_str(v)}'"
       when Integer then raw v.to_s
+      when TrueClass, FalseClass then raw(v ? 'TRUE' : 'FALSE')
       when nil then raw 'NULL'
       else raise NotImplementedError, v.inspect
       end
