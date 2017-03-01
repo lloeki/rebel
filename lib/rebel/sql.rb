@@ -134,7 +134,23 @@ module Rebel::SQL
     end
   end
 
+  @identifier_quote = '"'
+  @string_quote = "'"
+  @escaped_string_quote = "''"
+
   class << self
+    def identifier_quote=(str)
+      @identifier_quote = str
+    end
+
+    def string_quote=(str)
+      @string_quote = str
+    end
+
+    def escaped_string_quote=(str)
+      @escaped_string_quote = str
+    end
+
     def raw(str)
       Raw.new(str)
     end
@@ -231,7 +247,7 @@ module Rebel::SQL
       return name if name.is_a?(Raw)
       return raw('*') if name == '*'
 
-      raw(name.to_s.split('.').map { |e| "\"#{e}\"" }.join('.'))
+      raw(name.to_s.split('.').map { |e| "#{@identifier_quote}#{e}#{@identifier_quote}" }.join('.'))
     end
 
     def names(*names)
@@ -245,7 +261,7 @@ module Rebel::SQL
     def value(v)
       case v
       when Raw then v
-      when String then raw "'#{v.tr("'", "''")}'"
+      when String then raw "'#{v.tr(@string_quote, @escaped_string_quote)}'"
       when Integer then raw v.to_s
       when nil then raw 'NULL'
       else raise NotImplementedError, v.inspect
