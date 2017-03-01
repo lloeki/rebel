@@ -258,10 +258,14 @@ module Rebel::SQL
       items.join(', ')
     end
 
+    def escape_str(str)
+      str.tr(@string_quote, @escaped_string_quote)
+    end
+
     def value(v)
       case v
       when Raw then v
-      when String then raw "'#{v.tr(@string_quote, @escaped_string_quote)}'"
+      when String then raw "'#{escape_str(v)}'"
       when Integer then raw v.to_s
       when nil then raw 'NULL'
       else raise NotImplementedError, v.inspect
