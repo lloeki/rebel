@@ -1,0 +1,32 @@
+inherit_from: .rubocop_todo.yml
+
+Metrics/LineLength:
+    Enabled: false
+
+Metrics/ParameterLists:
+    Enabled: false
+
+Style/Documentation:
+    Enabled: false
+
+Style/ClassAndModuleChildren:
+    Enabled: false
+
+Metrics/ModuleLength:
+    Enabled: false
+
+Style/TrailingCommaInLiteral:
+    EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInArguments:
+    EnforcedStyleForMultiline: comma
+
+Style/NestedParenthesizedCalls:
+    Enabled: false
+
+Style/BracesAroundHashParameters:
+  Exclude:
+    - 'test/test_*.rb'
+
+Style/IndentArray:
+  EnforcedStyle: consistent

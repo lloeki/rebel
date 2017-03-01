@@ -105,7 +105,7 @@ module Rebel::SQL
     end
 
     def update(table_name, set: nil, where: nil, inner: nil, left: nil, right: nil)
-      fail ArgumentError if set.nil?
+      raise ArgumentError if set.nil?
 
       <<-SQL
       UPDATE #{Rebel::SQL.name(table_name)}
@@ -180,9 +180,9 @@ module Rebel::SQL
       case v
       when Raw then v
       when String then raw "'#{v.tr("'", "''")}'"
-      when Fixnum, Bignum, Integer then raw v.to_s
+      when Integer then raw v.to_s
       when nil then raw 'NULL'
-      else fail NotImplementedError, v.inspect
+      else raise NotImplementedError, v.inspect
       end
     end
 
@@ -218,7 +218,7 @@ module Rebel::SQL
         case e
         when Array then clause_term(e[0], e[1])
         when Raw, String then e
-        else fail NotImplementedError, e.class
+        else raise NotImplementedError, e.class
         end
       end.join(' AND ')
     end
@@ -226,7 +226,7 @@ module Rebel::SQL
     def where?(clause)
       return "WHERE #{clause}" if clause.is_a?(Raw) || clause.is_a?(String)
 
-      (clause && clause.any?) ? "WHERE #{Rebel::SQL.and_clause(clause)}" : nil
+      clause && clause.any? ? "WHERE #{Rebel::SQL.and_clause(clause)}" : nil
     end
 
     def inner?(join)
