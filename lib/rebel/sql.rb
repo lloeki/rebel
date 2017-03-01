@@ -9,13 +9,17 @@ module Rebel::SQL
     exec(Rebel::SQL.create_table(table_name, desc))
   end
 
+  def drop_table(table_name)
+    exec(Rebel::SQL.drop_table(table_name))
+  end
+
   def select(*fields, from: nil, where: nil, inner: nil, left: nil, right: nil)
     exec(Rebel::SQL.select(*fields,
-                    from: from,
-                    where: where,
-                    inner: inner,
-                    left: left,
-                    right: right))
+                           from: from,
+                           where: where,
+                           inner: inner,
+                           left: left,
+                           right: right))
   end
 
   def insert_into(table_name, *rows)
@@ -74,6 +78,12 @@ module Rebel::SQL
       CREATE TABLE #{Rebel::SQL.name(table_name)} (
         #{Rebel::SQL.list(desc.map { |k, v| "#{Rebel::SQL.name(k)} #{v}" })}
       );
+      SQL
+    end
+
+    def drop_table(table_name)
+      <<-SQL
+      DROP TABLE #{Rebel::SQL.name(table_name)};
       SQL
     end
 
