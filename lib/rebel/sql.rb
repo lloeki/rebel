@@ -73,20 +73,20 @@ module Rebel::SQL
       n ? as(n) : self
     end
 
-    def on(clause)
-      Raw.new(self + " ON #{Rebel::SQL.and_clause(clause)}")
+    def on(*clause)
+      Raw.new(self + " ON #{Rebel::SQL.and_clause(*clause)}")
     end
 
-    def on?(clause)
+    def on?(*clause)
       clause ? on(clause) : self
     end
 
-    def and(clause)
-      Raw.new("#{self} AND #{Rebel::SQL.and_clause(clause)}")
+    def and(*clause)
+      Raw.new("#{self} AND #{Rebel::SQL.and_clause(*clause)}")
     end
 
-    def or(clause)
-      Raw.new("#{self} OR #{Rebel::SQL.and_clause(clause)}").wants_parens!
+    def or(*clause)
+      Raw.new("#{self} OR #{Rebel::SQL.and_clause(*clause)}").wants_parens!
     end
 
     def eq(n)
