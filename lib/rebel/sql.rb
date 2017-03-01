@@ -165,7 +165,7 @@ module Rebel::SQL
       return name if name.is_a?(Raw)
       return raw('*') if name == '*'
 
-      name.to_s.split('.').map { |e| "\"#{e}\"" }.join('.')
+      raw(name.to_s.split('.').map { |e| "\"#{e}\"" }.join('.'))
     end
 
     def names(*names)
