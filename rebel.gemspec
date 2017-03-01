@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'rebel'
-  s.version     = '0.1.0'
+  s.version     = '0.2.0'
   s.licenses    = ['MIT']
   s.summary     = 'Fight against the Object tyranny'
   s.description = 'SQL-flavoured Ruby, or is it the other way around?'
