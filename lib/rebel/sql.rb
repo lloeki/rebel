@@ -66,6 +66,58 @@ module Rebel::SQL
     def on?(clause)
       clause ? on(clause) : self
     end
+
+    def and(clause)
+      Raw.new("#{self} AND #{Rebel::SQL.and_clause(clause)}")
+    end
+
+    def or(clause)
+      Raw.new("#{self} OR #{Rebel::SQL.and_clause(clause)}")
+    end
+
+    def eq(n)
+      case n
+      when nil
+        Raw.new("#{self} IS NULL")
+      else
+        Raw.new("#{self} = #{Rebel::SQL.name_or_value(n)}")
+      end
+    end
+    alias == eq
+
+    def ne(n)
+      case n
+      when nil
+        Raw.new("#{self} IS NOT NULL")
+      else
+        Raw.new("#{self} != #{Rebel::SQL.name_or_value(n)}")
+      end
+    end
+    alias != ne
+
+    def lt(n)
+      Raw.new("#{self} < #{Rebel::SQL.name_or_value(n)}")
+    end
+    alias < lt
+
+    def gt(n)
+      Raw.new("#{self} > #{Rebel::SQL.name_or_value(n)}")
+    end
+    alias > gt
+
+    def le(n)
+      Raw.new("#{self} <= #{Rebel::SQL.name_or_value(n)}")
+    end
+    alias <= le
+
+    def ge(n)
+      Raw.new("#{self} >= #{Rebel::SQL.name_or_value(n)}")
+    end
+    alias >= ge
+
+    def in(*v)
+      Raw.new("#{self} IN (#{Rebel::SQL.values(*v)})")
+    end
   end
 
   class << self
