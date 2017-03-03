@@ -15,6 +15,12 @@ class TestRaw < Minitest::Test
     assert_str_equal(Rebel::SQL.name(:foo).eq(1).or(Rebel::SQL.name(:bar).eq(2)), '"foo" = 1 OR "bar" = 2')
   end
 
+  def test_is
+    assert_str_equal(Rebel::SQL.name(:foo).is(nil), '"foo" IS NULL')
+    assert_str_equal(Rebel::SQL.name(:foo).is(42), '"foo" = 42')
+    assert_str_equal(Rebel::SQL.name(:foo).is(Rebel::SQL.name(:bar)), '"foo" = "bar"')
+  end
+
   def test_eq
     assert_str_equal(Rebel::SQL.name(:foo).eq(nil), '"foo" IS NULL')
     assert_str_equal(Rebel::SQL.name(:foo) == nil,  '"foo" IS NULL')

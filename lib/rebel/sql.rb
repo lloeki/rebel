@@ -98,6 +98,7 @@ module Rebel::SQL
       end
     end
     alias == eq
+    alias is eq
 
     def ne(n)
       case n
