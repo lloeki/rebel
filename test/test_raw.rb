@@ -15,6 +15,14 @@ class TestRaw < Minitest::Test
     assert_str_equal(Rebel::SQL.name(:foo).eq(1).or(Rebel::SQL.name(:bar).eq(2)), '"foo" = 1 OR "bar" = 2')
   end
 
+  def test_and_or
+    assert_str_equal(Rebel::SQL.name(:foo).eq(0).and(Rebel::SQL.name(:foo).eq(1).or(Rebel::SQL.name(:bar).eq(2))), '"foo" = 0 AND ("foo" = 1 OR "bar" = 2)')
+  end
+
+  def test_or_and_or
+    assert_str_equal(Rebel::SQL.name(:foo).eq(1).or(Rebel::SQL.name(:bar).eq(2)).and(Rebel::SQL.name(:foo).eq(3).or(Rebel::SQL.name(:bar).eq(4))), '("foo" = 1 OR "bar" = 2) AND ("foo" = 3 OR "bar" = 4)')
+  end
+
   def test_is
     assert_str_equal(Rebel::SQL.name(:foo).is(nil), '"foo" IS NULL')
     assert_str_equal(Rebel::SQL.name(:foo).is(42), '"foo" = 42')
@@ -62,7 +70,7 @@ class TestRaw < Minitest::Test
   def test_where
     assert_str_equal(Rebel::SQL.where?(foo: 1, bar: 2, baz: 3), 'WHERE "foo" = 1 AND "bar" = 2 AND "baz" = 3')
     assert_str_equal(Rebel::SQL.where?(Rebel::SQL.name(:foo).eq(1).or(Rebel::SQL.name(:bar).eq(2)), Rebel::SQL.name(:baz).eq(3)), 'WHERE ("foo" = 1 OR "bar" = 2) AND "baz" = 3')
-    assert_str_equal(Rebel::SQL.where?(Rebel::SQL.name(:foo).eq(1).or(Rebel::SQL.name(:bar).eq(2))), 'WHERE "foo" = 1 OR "bar" = 2')
+    assert_str_equal(Rebel::SQL.where?(Rebel::SQL.name(:foo).eq(1).or(Rebel::SQL.name(:bar).eq(2))), 'WHERE ("foo" = 1 OR "bar" = 2)')
   end
 
   def test_join

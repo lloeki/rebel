@@ -65,6 +65,10 @@ module Rebel::SQL
       Raw.new("(#{self})")
     end
 
+    def parens?
+      wants_parens? ? parens : self
+    end
+
     def as(n)
       Raw.new(self + " AS #{Rebel::SQL.name(n)}")
     end
@@ -82,7 +86,7 @@ module Rebel::SQL
     end
 
     def and(*clause)
-      Raw.new("#{self} AND #{Rebel::SQL.and_clause(*clause)}")
+      Raw.new("#{self.parens?} AND #{Rebel::SQL.and_clause(*clause)}")
     end
 
     def or(*clause)
@@ -313,7 +317,7 @@ module Rebel::SQL
         case e
         when Hash then and_clause(*e.to_a)
         when Array then clause_term(e[0], e[1])
-        when Raw then e.wants_parens? && clause.count > 1 ? "(#{e})" : e
+        when Raw then e.parens?
         when String then e
         else raise NotImplementedError, e.class
         end
