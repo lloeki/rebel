@@ -68,4 +68,8 @@ class TestRaw < Minitest::Test
   def test_join
     assert_str_equal(Rebel::SQL.join(:foo), 'JOIN "foo"')
   end
+
+  def test_function
+    assert_str_equal(Rebel::SQL.function('COALESCE', :foo, 0), 'COALESCE("foo", 0)')
+  end
 end

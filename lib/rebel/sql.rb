@@ -218,6 +218,11 @@ module Rebel::SQL
 
     ## Functions
 
+    def function(name, *args)
+      raw("#{name}(#{names_or_values(*args)})")
+    end
+    alias fn function
+
     def count(*n)
       raw("COUNT(#{names(*n)})")
     end
@@ -280,6 +285,10 @@ module Rebel::SQL
 
     def name_or_value(item)
       item.is_a?(Symbol) ? name(item) : value(item)
+    end
+
+    def names_or_values(*items)
+      list(items.map { |v| name_or_value(v) })
     end
 
     def equal(l, r)
