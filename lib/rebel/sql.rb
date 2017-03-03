@@ -158,32 +158,32 @@ module Rebel::SQL
 
     def create_table(table_name, desc)
       <<-SQL
-      CREATE TABLE #{Rebel::SQL.name(table_name)} (
-        #{Rebel::SQL.list(desc.map { |k, v| "#{Rebel::SQL.name(k)} #{v}" })}
+      CREATE TABLE #{name(table_name)} (
+        #{list(desc.map { |k, v| "#{name(k)} #{v}" })}
       );
       SQL
     end
 
     def drop_table(table_name)
       <<-SQL
-      DROP TABLE #{Rebel::SQL.name(table_name)};
+      DROP TABLE #{name(table_name)};
       SQL
     end
 
     def select(*fields, from: nil, where: nil, inner: nil, left: nil, right: nil)
       <<-SQL
       SELECT #{names(*fields)} FROM #{name(from)}
-      #{Rebel::SQL.inner?(inner)}
-      #{Rebel::SQL.left?(left)}
-      #{Rebel::SQL.right?(right)}
-      #{Rebel::SQL.where?(where)};
+      #{inner?(inner)}
+      #{left?(left)}
+      #{right?(right)}
+      #{where?(where)};
       SQL
     end
 
     def insert_into(table_name, *rows)
       <<-SQL
-      INSERT INTO #{Rebel::SQL.name(table_name)} (#{Rebel::SQL.names(*rows.first.keys)})
-      VALUES #{Rebel::SQL.list(rows.map { |r| "(#{Rebel::SQL.values(*r.values)})" })};
+      INSERT INTO #{name(table_name)} (#{names(*rows.first.keys)})
+      VALUES #{list(rows.map { |r| "(#{values(*r.values)})" })};
       SQL
     end
 
@@ -191,28 +191,28 @@ module Rebel::SQL
       raise ArgumentError if set.nil?
 
       <<-SQL
-      UPDATE #{Rebel::SQL.name(table_name)}
-      SET #{Rebel::SQL.assign_clause(set)}
-      #{Rebel::SQL.inner?(inner)}
-      #{Rebel::SQL.left?(left)}
-      #{Rebel::SQL.right?(right)}
-      #{Rebel::SQL.where?(where)};
+      UPDATE #{name(table_name)}
+      SET #{assign_clause(set)}
+      #{inner?(inner)}
+      #{left?(left)}
+      #{right?(right)}
+      #{where?(where)};
       SQL
     end
 
     def delete_from(table_name, where: nil, inner: nil, left: nil, right: nil)
       <<-SQL
-      DELETE FROM #{Rebel::SQL.name(table_name)}
-      #{Rebel::SQL.inner?(inner)}
-      #{Rebel::SQL.left?(left)}
-      #{Rebel::SQL.right?(right)}
-      #{Rebel::SQL.where?(where)};
+      DELETE FROM #{name(table_name)}
+      #{inner?(inner)}
+      #{left?(left)}
+      #{right?(right)}
+      #{where?(where)};
       SQL
     end
 
     def truncate(table_name)
       <<-SQL
-      TRUNCATE #{Rebel::SQL.name(table_name)};
+      TRUNCATE #{name(table_name)};
       SQL
     end
 
@@ -321,7 +321,7 @@ module Rebel::SQL
     end
 
     def where?(*clause)
-      clause.any? ? "WHERE #{Rebel::SQL.and_clause(*clause)}" : nil
+      clause.any? ? "WHERE #{and_clause(*clause)}" : nil
     end
 
     def inner?(join)
