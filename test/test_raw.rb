@@ -80,4 +80,16 @@ class TestRaw < Minitest::Test
   def test_function
     assert_str_equal(Rebel::SQL.function('COALESCE', :foo, 0), 'COALESCE("foo", 0)')
   end
+
+  def test_value
+    assert_str_equal(Rebel::SQL.value(Rebel::SQL.raw("'FOO'")), "'FOO'")
+    assert_str_equal(Rebel::SQL.value('FOO'), "'FOO'")
+    assert_str_equal(Rebel::SQL.value(1), '1')
+    assert_str_equal(Rebel::SQL.value(true), 'TRUE')
+    assert_str_equal(Rebel::SQL.value(false), 'FALSE')
+    assert_str_equal(Rebel::SQL.value(Date.new(2016, 12, 31)), "'2016-12-31'")
+    assert_str_equal(Rebel::SQL.value(Time.utc(2016, 12, 31, 23, 59, 59)), "'2016-12-31T23:59:59Z'")
+    assert_str_equal(Rebel::SQL.value(DateTime.new(2016, 12, 31, 23, 59, 59)), "'2016-12-31T23:59:59+00:00'")
+    assert_str_equal(Rebel::SQL.value(nil), 'NULL')
+  end
 end
