@@ -137,6 +137,10 @@ module Rebel::SQL
     def in(*v)
       Raw.new("#{self} IN (#{Rebel::SQL.values(*v)})")
     end
+
+    def like(n)
+      Raw.new("#{self} LIKE #{Rebel::SQL.value(n)}")
+    end
   end
 
   @identifier_quote = '"'
