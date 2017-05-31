@@ -13,13 +13,15 @@ module Rebel::SQL
     exec(Rebel::SQL.drop_table(table_name))
   end
 
-  def select(*fields, from: nil, where: nil, inner: nil, left: nil, right: nil)
+  def select(*fields, from: nil, where: nil, inner: nil, left: nil, right: nil, order_by: nil, limit: nil)
     exec(Rebel::SQL.select(*fields,
                            from: from,
                            where: where,
                            inner: inner,
                            left: left,
-                           right: right))
+                           right: right,
+                           order_by: order_by,
+                           limit: limit))
   end
 
   def insert_into(table_name, *rows)
@@ -178,13 +180,15 @@ module Rebel::SQL
       SQL
     end
 
-    def select(*fields, from: nil, where: nil, inner: nil, left: nil, right: nil)
+    def select(*fields, from: nil, where: nil, inner: nil, left: nil, right: nil, order_by: nil, limit: nil)
       <<-SQL
       SELECT #{names(*fields)} FROM #{name(from)}
       #{inner?(inner)}
       #{left?(left)}
       #{right?(right)}
-      #{where?(where)};
+      #{where?(where)}
+      #{order_by?(order_by)}
+      #{limit?(limit)};
       SQL
     end
 
@@ -304,8 +308,24 @@ module Rebel::SQL
       "#{name_or_value(l)} = #{name_or_value(r)}"
     end
 
+    def order(l, r)
+      "#{name(l)} #{value(raw(r.to_s))}"
+    end
+
     def assign_clause(clause)
       list(clause.map { |k, v| equal(k, v) })
+    end
+
+    def order_by_clause(clause)
+      case clause
+      when Symbol, String
+        order_by_clause(name(clause) => nil)
+      when Hash
+        list(clause.map { |k, v| order(k, v) })
+      when Array
+        list(clause.map { |c| order_by_clause(c) })
+      else raise NotImplementedError, clause.class
+      end
     end
 
     def clause_term(left, right)
@@ -343,6 +363,14 @@ module Rebel::SQL
 
     def right?(join)
       join ? "RIGHT #{join}" : nil
+    end
+
+    def order_by?(*clause)
+      clause.any? ? "ORDER BY #{order_by_clause(*clause)}" : nil
+    end
+
+    def limit?(count)
+      count ? "LIMIT #{count}" : nil
     end
   end
 end

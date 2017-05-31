@@ -46,4 +46,21 @@ class TestExec < Minitest::Test
     insert_into :foo, id: 1, col: 'whatevs'
     assert_equal(select('*', from: :foo), [[1, 'whatevs']])
   end
+
+  def test_limit
+    create_table :foo, id: 'INT', col: 'VARCHAR(255)'
+    insert_into :foo, id: 1, col: 'whatevs'
+    insert_into :foo, id: 2, col: 'something else'
+    assert_equal(select('*', from: :foo, limit: 1), [[1, 'whatevs']])
+  end
+
+  def test_order_by
+    create_table :foo, id: 'INT', col: 'VARCHAR(255)', value: 'VARCHAR(255)'
+    insert_into :foo, id: 1, value: '2', col: 'whatevs'
+    insert_into :foo, id: 2, value: '2', col: 'something'
+    insert_into :foo, id: 3, value: '1', col: 'else'
+    assert_equal(select(:id, from: :foo, order_by: :col), [[3], [2], [1]])
+    assert_equal(select(:id, from: :foo, order_by: {id: :desc}), [[3], [2], [1]])
+    assert_equal(select(:id, from: :foo, order_by: [value: :asc, id: :asc]), [[3], [1], [2]])
+  end
 end
