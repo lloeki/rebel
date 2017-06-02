@@ -156,9 +156,9 @@ module Rebel::SQL
       Raw.new("#{self} DESC")
     end
 
-    def by(*clause)
-      Raw.new(Rebel::SQL.list(self, Rebel::SQL.names(*clause)))
-    end
+    # def by(*clause)
+    #   Raw.new(Rebel::SQL.list(self, Rebel::SQL.names(*clause)))
+    # end
   end
 
   @identifier_quote = '"'
