@@ -59,8 +59,8 @@ class TestExec < Minitest::Test
     insert_into :foo, id: 1, value: '2', col: 'whatevs'
     insert_into :foo, id: 2, value: '2', col: 'something'
     insert_into :foo, id: 3, value: '1', col: 'else'
-    assert_equal(select(:id, from: :foo, order_by: :col), [[3], [2], [1]])
-    assert_equal(select(:id, from: :foo, order_by: {id: :desc}), [[3], [2], [1]])
-    assert_equal(select(:id, from: :foo, order_by: [value: :asc, id: :asc]), [[3], [1], [2]])
+    assert_equal(select(:id, from: :foo, order: by(:id).desc), [[3], [2], [1]])
+    assert_equal(select(:id, from: :foo, order: by(:value, :id).asc), [[3], [1], [2]])
+    assert_equal(select(:id, from: :foo, order: by(:value).asc.by(:id).desc), [[3], [2], [1]])
   end
 end

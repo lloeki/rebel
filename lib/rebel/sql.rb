@@ -13,14 +13,14 @@ module Rebel::SQL
     exec(Rebel::SQL.drop_table(table_name))
   end
 
-  def select(*fields, from: nil, where: nil, inner: nil, left: nil, right: nil, order_by: nil, limit: nil)
+  def select(*fields, from: nil, where: nil, inner: nil, left: nil, right: nil, order: nil, limit: nil)
     exec(Rebel::SQL.select(*fields,
                            from: from,
                            where: where,
                            inner: inner,
                            left: left,
                            right: right,
-                           order_by: order_by,
+                           order: order,
                            limit: limit))
   end
 
@@ -50,6 +50,10 @@ module Rebel::SQL
 
   def outer_join(table, on: nil)
     Rebel::SQL.outer_join(table, on: on)
+  end
+
+  def by(*clause)
+    Rebel::SQL.by(clause)
   end
 
   class Raw < String
@@ -143,6 +147,18 @@ module Rebel::SQL
     def like(n)
       Raw.new("#{self} LIKE #{Rebel::SQL.value(n)}")
     end
+
+    def asc
+      Raw.new("#{self} ASC")
+    end
+
+    def desc
+      Raw.new("#{self} DESC")
+    end
+
+    def by(*clause)
+      Raw.new(Rebel::SQL.list(self, Rebel::SQL.names(*clause)))
+    end
   end
 
   @identifier_quote = '"'
@@ -180,14 +196,14 @@ module Rebel::SQL
       SQL
     end
 
-    def select(*fields, from: nil, where: nil, inner: nil, left: nil, right: nil, order_by: nil, limit: nil)
+    def select(*fields, from: nil, where: nil, inner: nil, left: nil, right: nil, order: nil, limit: nil)
       <<-SQL
       SELECT #{names(*fields)} FROM #{name(from)}
       #{inner?(inner)}
       #{left?(left)}
       #{right?(right)}
       #{where?(where)}
-      #{order_by?(order_by)}
+      #{order?(order)}
       #{limit?(limit)};
       SQL
     end
@@ -259,6 +275,11 @@ module Rebel::SQL
       raw(right? outer_join(table, on: on))
     end
 
+    def by(clause)
+      raw("BY #{names(*clause)}")
+    end
+
+
     ## Support
 
     def name(name)
@@ -308,24 +329,8 @@ module Rebel::SQL
       "#{name_or_value(l)} = #{name_or_value(r)}"
     end
 
-    def order(l, r)
-      "#{name(l)} #{value(raw(r.to_s))}"
-    end
-
     def assign_clause(clause)
       list(clause.map { |k, v| equal(k, v) })
-    end
-
-    def order_by_clause(clause)
-      case clause
-      when Symbol, String
-        order_by_clause(name(clause) => nil)
-      when Hash
-        list(clause.map { |k, v| order(k, v) })
-      when Array
-        list(clause.map { |c| order_by_clause(c) })
-      else raise NotImplementedError, clause.class
-      end
     end
 
     def clause_term(left, right)
@@ -365,8 +370,8 @@ module Rebel::SQL
       join ? "RIGHT #{join}" : nil
     end
 
-    def order_by?(*clause)
-      clause.any? ? "ORDER BY #{order_by_clause(*clause)}" : nil
+    def order?(clause)
+      clause ? "ORDER #{clause}" : nil
     end
 
     def limit?(count)

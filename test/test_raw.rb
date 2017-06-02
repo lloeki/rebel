@@ -96,4 +96,18 @@ class TestRaw < Minitest::Test
     assert_str_equal(Rebel::SQL.value(DateTime.new(2016, 12, 31, 23, 59, 59)), "'2016-12-31T23:59:59+00:00'")
     assert_str_equal(Rebel::SQL.value(nil), 'NULL')
   end
+
+  def test_asc
+    assert_str_equal(Rebel::SQL.raw("'FOO'").asc, "'FOO' ASC")
+  end
+
+  def test_desc
+    assert_str_equal(Rebel::SQL.raw("'FOO'").desc, "'FOO' DESC")
+  end
+
+  def test_by
+    assert_str_equal(Rebel::SQL.by(:foo), 'BY "foo"')
+    assert_str_equal(Rebel::SQL.by(:foo).desc, 'BY "foo" DESC')
+    assert_str_equal(Rebel::SQL.by(:foo).desc.by(:bar).asc, 'BY "foo" DESC, "bar" ASC')
+  end
 end
