@@ -165,62 +165,62 @@ module Rebel::SQL
     end
 
     def create_table(table_name, desc)
-      <<-SQL
+      raw <<-SQL
       CREATE TABLE #{name(table_name)} (
         #{list(desc.map { |k, v| "#{name(k)} #{v}" })}
-      );
+      )
       SQL
     end
 
     def drop_table(table_name)
-      <<-SQL
-      DROP TABLE #{name(table_name)};
+      raw <<-SQL
+      DROP TABLE #{name(table_name)}
       SQL
     end
 
     def select(*fields, from: nil, where: nil, inner: nil, left: nil, right: nil)
-      <<-SQL
+      raw <<-SQL
       SELECT #{names(*fields)} FROM #{name(from)}
       #{inner?(inner)}
       #{left?(left)}
       #{right?(right)}
-      #{where?(where)};
+      #{where?(where)}
       SQL
     end
 
     def insert_into(table_name, *rows)
-      <<-SQL
+      raw <<-SQL
       INSERT INTO #{name(table_name)} (#{names(*rows.first.keys)})
-      VALUES #{list(rows.map { |r| "(#{values(*r.values)})" })};
+      VALUES #{list(rows.map { |r| "(#{values(*r.values)})" })}
       SQL
     end
 
     def update(table_name, set: nil, where: nil, inner: nil, left: nil, right: nil)
       raise ArgumentError if set.nil?
 
-      <<-SQL
+      raw <<-SQL
       UPDATE #{name(table_name)}
       SET #{assign_clause(set)}
       #{inner?(inner)}
       #{left?(left)}
       #{right?(right)}
-      #{where?(where)};
+      #{where?(where)}
       SQL
     end
 
     def delete_from(table_name, where: nil, inner: nil, left: nil, right: nil)
-      <<-SQL
+      raw <<-SQL
       DELETE FROM #{name(table_name)}
       #{inner?(inner)}
       #{left?(left)}
       #{right?(right)}
-      #{where?(where)};
+      #{where?(where)}
       SQL
     end
 
     def truncate(table_name)
-      <<-SQL
-      TRUNCATE #{name(table_name)};
+      raw <<-SQL
+      TRUNCATE #{name(table_name)}
       SQL
     end
 
