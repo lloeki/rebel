@@ -85,6 +85,10 @@ class TestRaw < Minitest::Test
     assert_str_equal(Rebel::SQL.function('COALESCE', :foo, 0), 'COALESCE("foo", 0)')
   end
 
+  def test_where_function
+    assert_str_equal(Rebel::SQL.where?(Rebel::SQL.function('COALESCE', :foo, 0).eq 42), 'WHERE COALESCE("foo", 0) = 42')
+  end
+
   def test_value
     assert_str_equal(Rebel::SQL.value(Rebel::SQL.raw("'FOO'")), "'FOO'")
     assert_str_equal(Rebel::SQL.value('FOO'), "'FOO'")
@@ -95,5 +99,13 @@ class TestRaw < Minitest::Test
     assert_str_equal(Rebel::SQL.value(Time.utc(2016, 12, 31, 23, 59, 59)), "'2016-12-31T23:59:59Z'")
     assert_str_equal(Rebel::SQL.value(DateTime.new(2016, 12, 31, 23, 59, 59)), "'2016-12-31T23:59:59+00:00'")
     assert_str_equal(Rebel::SQL.value(nil), 'NULL')
+  end
+
+  def test_select
+    assert_str_equal(Rebel::SQL.select(Rebel::SQL.raw('*'), from: Rebel::SQL.name(:foo)).gsub(/\s+/, ' ').strip, 'SELECT * FROM "foo"')
+  end
+
+  def test_nested_select
+    assert_str_equal(Rebel::SQL.select(Rebel::SQL.raw('*'), from: Rebel::SQL.name(:foo), where: Rebel::SQL.name(:bar).in(Rebel::SQL.select(Rebel::SQL.name(:bar), from: Rebel::SQL.name(:foo)))).gsub(/\s+/, ' ').strip, 'SELECT * FROM "foo" WHERE "bar" IN ( SELECT "bar" FROM "foo" )')
   end
 end
