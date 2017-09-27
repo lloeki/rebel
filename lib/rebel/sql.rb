@@ -82,7 +82,7 @@ module Rebel::SQL
     end
 
     def on?(*clause)
-      clause.any? ? on(clause) : self
+      clause.any? ? on(*clause) : self
     end
 
     def and(*clause)
