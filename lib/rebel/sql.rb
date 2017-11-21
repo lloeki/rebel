@@ -13,8 +13,9 @@ module Rebel::SQL
     exec(Rebel::SQL.drop_table(table_name))
   end
 
-  def select(*fields, from: nil, where: nil, inner: nil, left: nil, right: nil)
+  def select(*fields, distinct: distinct, from: nil, where: nil, inner: nil, left: nil, right: nil)
     exec(Rebel::SQL.select(*fields,
+                           distinct: distinct,
                            from: from,
                            where: where,
                            inner: inner,
@@ -178,9 +179,9 @@ module Rebel::SQL
       SQL
     end
 
-    def select(*fields, from: nil, where: nil, inner: nil, left: nil, right: nil)
+    def select(*fields, distinct: nil, from: nil, where: nil, inner: nil, left: nil, right: nil)
       raw <<-SQL
-      SELECT #{names(*fields)}
+      SELECT #{distinct ? "DISTINCT #{names(*distinct)}" : names(*fields)}
       #{from?(from)}
       #{inner?(inner)}
       #{left?(left)}

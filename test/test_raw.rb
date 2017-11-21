@@ -109,6 +109,14 @@ class TestRaw < Minitest::Test
     assert_str_equal(Rebel::SQL.select(Rebel::SQL.raw('1')).strip, 'SELECT 1')
   end
 
+  def test_select_distinct
+    assert_str_equal(Rebel::SQL.select(distinct: :bar, from: :foo).gsub(/\s+/, ' ').strip, 'SELECT DISTINCT "bar" FROM "foo"')
+  end
+
+  def test_select_distinct_multiple
+    assert_str_equal(Rebel::SQL.select(distinct: [:bar, :baz], from: :foo).gsub(/\s+/, ' ').strip, 'SELECT DISTINCT "bar", "baz" FROM "foo"')
+  end
+
   def test_nested_select
     assert_str_equal(Rebel::SQL.select(Rebel::SQL.raw('*'), from: Rebel::SQL.name(:foo), where: Rebel::SQL.name(:bar).in(Rebel::SQL.select(Rebel::SQL.name(:bar), from: Rebel::SQL.name(:foo)))).gsub(/\s+/, ' ').strip, 'SELECT * FROM "foo" WHERE "bar" IN ( SELECT "bar" FROM "foo" )')
   end
