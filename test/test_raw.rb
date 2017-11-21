@@ -117,6 +117,34 @@ class TestRaw < Minitest::Test
     assert_str_equal(Rebel::SQL.select(distinct: [:bar, :baz], from: :foo).gsub(/\s+/, ' ').strip, 'SELECT DISTINCT "bar", "baz" FROM "foo"')
   end
 
+  def test_select_group_by
+    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, group: Rebel::SQL.by(:baz)).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" GROUP BY "baz"')
+  end
+
+  def test_select_group_by_having
+    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, group: Rebel::SQL.by(:baz).having(Rebel::SQL.count(:qux).gt(5))).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" GROUP BY "baz" HAVING COUNT("qux") > 5')
+  end
+
+  def test_select_order_by
+    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, order: Rebel::SQL.by(:baz)).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" ORDER BY "baz"')
+  end
+
+  def test_select_order_by_asc
+    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, order: Rebel::SQL.by(:baz).asc).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" ORDER BY "baz" ASC')
+  end
+
+  def test_select_order_by_desc
+    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, order: Rebel::SQL.by(:baz).desc).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" ORDER BY "baz" DESC')
+  end
+
+  def test_select_multiple_order_by
+    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, order: Rebel::SQL.by(:baz, :qux)).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" ORDER BY "baz", "qux"')
+  end
+
+  def test_select_multiple_order_by_opposing
+    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, order: Rebel::SQL.by(Rebel::SQL.name(:baz).asc, Rebel::SQL.name(:qux).desc)).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" ORDER BY "baz" ASC, "qux" DESC')
+  end
+
   def test_select_limit
     assert_str_equal(Rebel::SQL.select(:bar, from: :foo, limit: 10).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" LIMIT 10')
   end

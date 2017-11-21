@@ -13,7 +13,7 @@ module Rebel::SQL
     exec(Rebel::SQL.drop_table(table_name))
   end
 
-  def select(*fields, distinct: distinct, from: nil, where: nil, inner: nil, left: nil, right: nil, limit: nil, offset: nil)
+  def select(*fields, distinct: distinct, from: nil, where: nil, inner: nil, left: nil, right: nil, group: nil, order: nil, limit: nil, offset: nil)
     exec(Rebel::SQL.select(*fields,
                            distinct: distinct,
                            from: from,
@@ -21,6 +21,8 @@ module Rebel::SQL
                            inner: inner,
                            left: left,
                            right: right,
+                           group: group,
+                           order: order,
                            limit: limit,
                            offset: offset))
   end
@@ -86,6 +88,18 @@ module Rebel::SQL
 
     def on?(*clause)
       clause.any? ? on(*clause) : self
+    end
+
+    def having(*clause)
+      Raw.new(self + " HAVING #{Rebel::SQL.and_clause(*clause)}")
+    end
+
+    def asc
+      Raw.new(self + " ASC")
+    end
+
+    def desc
+      Raw.new(self + " DESC")
     end
 
     def and(*clause)
@@ -181,7 +195,7 @@ module Rebel::SQL
       SQL
     end
 
-    def select(*fields, distinct: nil, from: nil, where: nil, inner: nil, left: nil, right: nil, limit: nil, offset: nil)
+    def select(*fields, distinct: nil, from: nil, where: nil, inner: nil, left: nil, right: nil, group: nil, order: nil, limit: nil, offset: nil)
       raw <<-SQL
       SELECT #{distinct ? "DISTINCT #{names(*distinct)}" : names(*fields)}
       #{from?(from)}
@@ -189,6 +203,8 @@ module Rebel::SQL
       #{left?(left)}
       #{right?(right)}
       #{where?(where)}
+      #{group?(group)}
+      #{order?(order)}
       #{limit?(limit, offset)}
       SQL
     end
@@ -235,6 +251,10 @@ module Rebel::SQL
       raw("#{name}(#{names_or_values(*args)})")
     end
     alias fn function
+
+    def by(*n)
+      raw("BY #{names(*n)}")
+    end
 
     def count(*n)
       raw("COUNT(#{names(*n)})")
@@ -352,6 +372,14 @@ module Rebel::SQL
 
     def right?(join)
       join ? "RIGHT #{join}" : nil
+    end
+
+    def group?(group)
+      group ? "GROUP #{name(group)}" : nil
+    end
+
+    def order?(order)
+      order ? "ORDER #{name(order)}" : nil
     end
 
     def limit?(limit, offset)
