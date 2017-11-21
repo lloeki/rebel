@@ -3,157 +3,157 @@ require 'helper'
 require 'rebel'
 
 class TestRaw < Minitest::Test
-  def assert_str_equal(expected, actual)
-    assert_equal(expected.to_s, actual.to_s)
+  def assert_sql(expected, &actual)
+    assert_equal(expected.to_s, Rebel::SQL.instance_eval(&actual).to_s)
   end
 
   def test_and
-    assert_str_equal(Rebel::SQL.name(:foo).eq(1).and(Rebel::SQL.name(:bar).eq(2)), '"foo" = 1 AND "bar" = 2')
+    assert_sql('"foo" = 1 AND "bar" = 2') { name(:foo).eq(1).and(name(:bar).eq(2)) }
   end
 
   def test_or
-    assert_str_equal(Rebel::SQL.name(:foo).eq(1).or(Rebel::SQL.name(:bar).eq(2)), '"foo" = 1 OR "bar" = 2')
+    assert_sql('"foo" = 1 OR "bar" = 2') { name(:foo).eq(1).or(name(:bar).eq(2)) }
   end
 
   def test_and_or
-    assert_str_equal(Rebel::SQL.name(:foo).eq(0).and(Rebel::SQL.name(:foo).eq(1).or(Rebel::SQL.name(:bar).eq(2))), '"foo" = 0 AND ("foo" = 1 OR "bar" = 2)')
+    assert_sql('"foo" = 0 AND ("foo" = 1 OR "bar" = 2)') { name(:foo).eq(0).and(name(:foo).eq(1).or(name(:bar).eq(2))) }
   end
 
   def test_or_and_or
-    assert_str_equal(Rebel::SQL.name(:foo).eq(1).or(Rebel::SQL.name(:bar).eq(2)).and(Rebel::SQL.name(:foo).eq(3).or(Rebel::SQL.name(:bar).eq(4))), '("foo" = 1 OR "bar" = 2) AND ("foo" = 3 OR "bar" = 4)')
+    assert_sql('("foo" = 1 OR "bar" = 2) AND ("foo" = 3 OR "bar" = 4)') { name(:foo).eq(1).or(name(:bar).eq(2)).and(name(:foo).eq(3).or(name(:bar).eq(4))) }
   end
 
   def test_is
-    assert_str_equal(Rebel::SQL.name(:foo).is(nil), '"foo" IS NULL')
-    assert_str_equal(Rebel::SQL.name(:foo).is(42), '"foo" = 42')
-    assert_str_equal(Rebel::SQL.name(:foo).is(Rebel::SQL.name(:bar)), '"foo" = "bar"')
+    assert_sql('"foo" IS NULL') { name(:foo).is(nil) }
+    assert_sql('"foo" = 42') { name(:foo).is(42) }
+    assert_sql('"foo" = "bar"') { name(:foo).is(name(:bar)) }
   end
 
   def test_eq
-    assert_str_equal(Rebel::SQL.name(:foo).eq(nil), '"foo" IS NULL')
-    assert_str_equal(Rebel::SQL.name(:foo) == nil,  '"foo" IS NULL')
-    assert_str_equal(Rebel::SQL.name(:foo).eq(Rebel::SQL.name(:bar)), '"foo" = "bar"')
-    assert_str_equal(Rebel::SQL.name(:foo) == Rebel::SQL.name(:bar),  '"foo" = "bar"')
+    assert_sql('"foo" IS NULL') { name(:foo).eq(nil) }
+    assert_sql('"foo" IS NULL') { name(:foo) == nil }
+    assert_sql('"foo" = "bar"') { name(:foo).eq(name(:bar)) }
+    assert_sql('"foo" = "bar"') { name(:foo) == name(:bar) }
   end
 
   def test_ne
-    assert_str_equal(Rebel::SQL.name(:foo).ne(Rebel::SQL.name(:bar)), '"foo" != "bar"')
-    assert_str_equal(Rebel::SQL.name(:foo) != Rebel::SQL.name(:bar), '"foo" != "bar"')
-    assert_str_equal(Rebel::SQL.name(:foo).ne(nil), '"foo" IS NOT NULL')
-    assert_str_equal(Rebel::SQL.name(:foo) != nil, '"foo" IS NOT NULL')
+    assert_sql('"foo" != "bar"') { name(:foo).ne(name(:bar)) }
+    assert_sql('"foo" != "bar"') { name(:foo) != name(:bar) }
+    assert_sql('"foo" IS NOT NULL') { name(:foo).ne(nil) }
+    assert_sql('"foo" IS NOT NULL') { name(:foo) != nil }
   end
 
   def test_lt
-    assert_str_equal(Rebel::SQL.name(:foo).lt(Rebel::SQL.name(:bar)), '"foo" < "bar"')
-    assert_str_equal(Rebel::SQL.name(:foo) <  Rebel::SQL.name(:bar),  '"foo" < "bar"')
+    assert_sql('"foo" < "bar"') { name(:foo).lt(name(:bar)) }
+    assert_sql('"foo" < "bar"') { name(:foo) <  name(:bar) }
   end
 
   def test_gt
-    assert_str_equal(Rebel::SQL.name(:foo).gt(Rebel::SQL.name(:bar)), '"foo" > "bar"')
-    assert_str_equal(Rebel::SQL.name(:foo) >  Rebel::SQL.name(:bar),  '"foo" > "bar"')
+    assert_sql('"foo" > "bar"') { name(:foo).gt(name(:bar)) }
+    assert_sql('"foo" > "bar"') { name(:foo) >  name(:bar) }
   end
 
   def test_le
-    assert_str_equal(Rebel::SQL.name(:foo).le(Rebel::SQL.name(:bar)), '"foo" <= "bar"')
-    assert_str_equal(Rebel::SQL.name(:foo) <= Rebel::SQL.name(:bar),  '"foo" <= "bar"')
+    assert_sql('"foo" <= "bar"') { name(:foo).le(name(:bar)) }
+    assert_sql('"foo" <= "bar"') { name(:foo) <= name(:bar) }
   end
 
   def test_ge
-    assert_str_equal(Rebel::SQL.name(:foo).ge(Rebel::SQL.name(:bar)), '"foo" >= "bar"')
-    assert_str_equal(Rebel::SQL.name(:foo) >= Rebel::SQL.name(:bar),  '"foo" >= "bar"')
+    assert_sql('"foo" >= "bar"') { name(:foo).ge(name(:bar)) }
+    assert_sql('"foo" >= "bar"') { name(:foo) >= name(:bar) }
   end
 
   def test_in
-    assert_str_equal(Rebel::SQL.name(:foo).in(1, 2, 3), '"foo" IN (1, 2, 3)')
+    assert_sql('"foo" IN (1, 2, 3)') { name(:foo).in(1, 2, 3) }
   end
 
   def test_like
-    assert_str_equal(Rebel::SQL.name(:foo).like('%bar%'), %("foo" LIKE '%bar%'))
+    assert_sql(%("foo" LIKE '%bar%')) { name(:foo).like('%bar%') }
   end
 
   def test_where
-    assert_str_equal(Rebel::SQL.where?(foo: 1, bar: 2, baz: 3), 'WHERE "foo" = 1 AND "bar" = 2 AND "baz" = 3')
-    assert_str_equal(Rebel::SQL.where?(Rebel::SQL.name(:foo).eq(1).or(Rebel::SQL.name(:bar).eq(2)), Rebel::SQL.name(:baz).eq(3)), 'WHERE ("foo" = 1 OR "bar" = 2) AND "baz" = 3')
-    assert_str_equal(Rebel::SQL.where?(Rebel::SQL.name(:foo).eq(1).or(Rebel::SQL.name(:bar).eq(2))), 'WHERE ("foo" = 1 OR "bar" = 2)')
+    assert_sql('WHERE "foo" = 1 AND "bar" = 2 AND "baz" = 3') { where?(foo: 1, bar: 2, baz: 3) }
+    assert_sql('WHERE ("foo" = 1 OR "bar" = 2) AND "baz" = 3') { where?(name(:foo).eq(1).or(name(:bar).eq(2)), name(:baz).eq(3)) }
+    assert_sql('WHERE ("foo" = 1 OR "bar" = 2)') { where?(name(:foo).eq(1).or(name(:bar).eq(2))) }
   end
 
   def test_join
-    assert_str_equal(Rebel::SQL.join(:foo), 'JOIN "foo"')
+    assert_sql('JOIN "foo"') { join(:foo) }
   end
 
   def test_function
-    assert_str_equal(Rebel::SQL.function('COALESCE', :foo, 0), 'COALESCE("foo", 0)')
+    assert_sql('COALESCE("foo", 0)') { function('COALESCE', :foo, 0) }
   end
 
   def test_where_function
-    assert_str_equal(Rebel::SQL.where?(Rebel::SQL.function('COALESCE', :foo, 0).eq 42), 'WHERE COALESCE("foo", 0) = 42')
+    assert_sql('WHERE COALESCE("foo", 0) = 42') { where?(function('COALESCE', :foo, 0).eq 42) }
   end
 
   def test_value
-    assert_str_equal(Rebel::SQL.value(Rebel::SQL.raw("'FOO'")), "'FOO'")
-    assert_str_equal(Rebel::SQL.value('FOO'), "'FOO'")
-    assert_str_equal(Rebel::SQL.value(1), '1')
-    assert_str_equal(Rebel::SQL.value(true), 'TRUE')
-    assert_str_equal(Rebel::SQL.value(false), 'FALSE')
-    assert_str_equal(Rebel::SQL.value(Date.new(2016, 12, 31)), "'2016-12-31'")
-    assert_str_equal(Rebel::SQL.value(Time.utc(2016, 12, 31, 23, 59, 59)), "'2016-12-31T23:59:59Z'")
-    assert_str_equal(Rebel::SQL.value(DateTime.new(2016, 12, 31, 23, 59, 59)), "'2016-12-31T23:59:59+00:00'")
-    assert_str_equal(Rebel::SQL.value(nil), 'NULL')
+    assert_sql("'FOO'") { value(raw("'FOO'")) }
+    assert_sql("'FOO'") { value('FOO') }
+    assert_sql('1') { value(1) }
+    assert_sql('TRUE') { value(true) }
+    assert_sql('FALSE') { value(false) }
+    assert_sql("'2016-12-31'") { value(Date.new(2016, 12, 31)) }
+    assert_sql("'2016-12-31T23:59:59Z'") { value(Time.utc(2016, 12, 31, 23, 59, 59)) }
+    assert_sql("'2016-12-31T23:59:59+00:00'") { value(DateTime.new(2016, 12, 31, 23, 59, 59)) }
+    assert_sql('NULL') { value(nil) }
   end
 
   def test_select
-    assert_str_equal(Rebel::SQL.select(Rebel::SQL.raw('*'), from: Rebel::SQL.name(:foo)).gsub(/\s+/, ' ').strip, 'SELECT * FROM "foo"')
+    assert_sql('SELECT * FROM "foo"') { select(raw('*'), from: name(:foo)).gsub(/\s+/, ' ').strip }
   end
 
   def test_select_without_from
-    assert_str_equal(Rebel::SQL.select(Rebel::SQL.raw('1')).strip, 'SELECT 1')
+    assert_sql('SELECT 1') { select(raw('1')).strip }
   end
 
   def test_select_distinct
-    assert_str_equal(Rebel::SQL.select(distinct: :bar, from: :foo).gsub(/\s+/, ' ').strip, 'SELECT DISTINCT "bar" FROM "foo"')
+    assert_sql('SELECT DISTINCT "bar" FROM "foo"') { select(distinct: :bar, from: :foo).gsub(/\s+/, ' ').strip }
   end
 
   def test_select_distinct_multiple
-    assert_str_equal(Rebel::SQL.select(distinct: [:bar, :baz], from: :foo).gsub(/\s+/, ' ').strip, 'SELECT DISTINCT "bar", "baz" FROM "foo"')
+    assert_sql('SELECT DISTINCT "bar", "baz" FROM "foo"') { select(distinct: [:bar, :baz], from: :foo).gsub(/\s+/, ' ').strip }
   end
 
   def test_select_group_by
-    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, group: Rebel::SQL.by(:baz)).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" GROUP BY "baz"')
+    assert_sql('SELECT "bar" FROM "foo" GROUP BY "baz"') { select(:bar, from: :foo, group: by(:baz)).gsub(/\s+/, ' ').strip }
   end
 
   def test_select_group_by_having
-    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, group: Rebel::SQL.by(:baz).having(Rebel::SQL.count(:qux).gt(5))).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" GROUP BY "baz" HAVING COUNT("qux") > 5')
+    assert_sql('SELECT "bar" FROM "foo" GROUP BY "baz" HAVING COUNT("qux") > 5') { select(:bar, from: :foo, group: by(:baz).having(count(:qux).gt(5))).gsub(/\s+/, ' ').strip }
   end
 
   def test_select_order_by
-    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, order: Rebel::SQL.by(:baz)).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" ORDER BY "baz"')
+    assert_sql('SELECT "bar" FROM "foo" ORDER BY "baz"') { select(:bar, from: :foo, order: by(:baz)).gsub(/\s+/, ' ').strip }
   end
 
   def test_select_order_by_asc
-    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, order: Rebel::SQL.by(:baz).asc).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" ORDER BY "baz" ASC')
+    assert_sql('SELECT "bar" FROM "foo" ORDER BY "baz" ASC') { select(:bar, from: :foo, order: by(:baz).asc).gsub(/\s+/, ' ').strip }
   end
 
   def test_select_order_by_desc
-    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, order: Rebel::SQL.by(:baz).desc).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" ORDER BY "baz" DESC')
+    assert_sql('SELECT "bar" FROM "foo" ORDER BY "baz" DESC') { select(:bar, from: :foo, order: by(:baz).desc).gsub(/\s+/, ' ').strip }
   end
 
   def test_select_multiple_order_by
-    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, order: Rebel::SQL.by(:baz, :qux)).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" ORDER BY "baz", "qux"')
+    assert_sql('SELECT "bar" FROM "foo" ORDER BY "baz", "qux"') { select(:bar, from: :foo, order: by(:baz, :qux)).gsub(/\s+/, ' ').strip }
   end
 
   def test_select_multiple_order_by_opposing
-    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, order: Rebel::SQL.by(Rebel::SQL.name(:baz).asc, Rebel::SQL.name(:qux).desc)).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" ORDER BY "baz" ASC, "qux" DESC')
+    assert_sql('SELECT "bar" FROM "foo" ORDER BY "baz" ASC, "qux" DESC') { select(:bar, from: :foo, order: by(name(:baz).asc, name(:qux).desc)).gsub(/\s+/, ' ').strip }
   end
 
   def test_select_limit
-    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, limit: 10).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" LIMIT 10')
+    assert_sql('SELECT "bar" FROM "foo" LIMIT 10') { select(:bar, from: :foo, limit: 10).gsub(/\s+/, ' ').strip }
   end
 
   def test_select_offset
-    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, limit: 10, offset: 20).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" LIMIT 10 OFFSET 20')
+    assert_sql('SELECT "bar" FROM "foo" LIMIT 10 OFFSET 20') { select(:bar, from: :foo, limit: 10, offset: 20).gsub(/\s+/, ' ').strip }
   end
 
   def test_nested_select
-    assert_str_equal(Rebel::SQL.select(Rebel::SQL.raw('*'), from: Rebel::SQL.name(:foo), where: Rebel::SQL.name(:bar).in(Rebel::SQL.select(Rebel::SQL.name(:bar), from: Rebel::SQL.name(:foo)))).gsub(/\s+/, ' ').strip, 'SELECT * FROM "foo" WHERE "bar" IN ( SELECT "bar" FROM "foo" )')
+    assert_sql('SELECT * FROM "foo" WHERE "bar" IN ( SELECT "bar" FROM "foo" )') { select(raw('*'), from: name(:foo), where: name(:bar).in(select(name(:bar), from: name(:foo)))).gsub(/\s+/, ' ').strip }
   end
 end
