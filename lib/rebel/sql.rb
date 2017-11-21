@@ -132,6 +132,7 @@ module Rebel::SQL
       end
     end
     alias != ne
+    alias is_not ne
 
     def lt(n)
       Raw.new("#{self} < #{Rebel::SQL.name_or_value(n)}")
@@ -157,8 +158,16 @@ module Rebel::SQL
       Raw.new("#{self} IN (#{Rebel::SQL.values(*v)})")
     end
 
+    def not_in(*v)
+      Raw.new("#{self} NOT IN (#{Rebel::SQL.values(*v)})")
+    end
+
     def like(n)
       Raw.new("#{self} LIKE #{Rebel::SQL.value(n)}")
+    end
+
+    def not_like(n)
+      Raw.new("#{self} NOT LIKE #{Rebel::SQL.value(n)}")
     end
   end
 

@@ -40,6 +40,12 @@ class TestRaw < Minitest::Test
     assert_sql('"foo" = "bar"') { name(:foo).is(name(:bar)) }
   end
 
+  def test_is_not
+    assert_sql('"foo" IS NOT NULL') { name(:foo).is_not(nil) }
+    assert_sql('"foo" != 42') { name(:foo).is_not(42) }
+    assert_sql('"foo" != "bar"') { name(:foo).is_not(name(:bar)) }
+  end
+
   def test_eq
     assert_sql('"foo" IS NULL') { name(:foo).eq(nil) }
     assert_sql('"foo" IS NULL') { name(:foo) == nil }
@@ -78,8 +84,16 @@ class TestRaw < Minitest::Test
     assert_sql('"foo" IN (1, 2, 3)') { name(:foo).in(1, 2, 3) }
   end
 
+  def test_not_in
+    assert_sql('"foo" NOT IN (1, 2, 3)') { name(:foo).not_in(1, 2, 3) }
+  end
+
   def test_like
     assert_sql(%("foo" LIKE '%bar%')) { name(:foo).like('%bar%') }
+  end
+
+  def test_not_like
+    assert_sql(%("foo" NOT LIKE '%bar%')) { name(:foo).not_like('%bar%') }
   end
 
   def test_where
