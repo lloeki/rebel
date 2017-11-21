@@ -117,6 +117,14 @@ class TestRaw < Minitest::Test
     assert_str_equal(Rebel::SQL.select(distinct: [:bar, :baz], from: :foo).gsub(/\s+/, ' ').strip, 'SELECT DISTINCT "bar", "baz" FROM "foo"')
   end
 
+  def test_select_limit
+    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, limit: 10).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" LIMIT 10')
+  end
+
+  def test_select_offset
+    assert_str_equal(Rebel::SQL.select(:bar, from: :foo, limit: 10, offset: 20).gsub(/\s+/, ' ').strip, 'SELECT "bar" FROM "foo" LIMIT 10 OFFSET 20')
+  end
+
   def test_nested_select
     assert_str_equal(Rebel::SQL.select(Rebel::SQL.raw('*'), from: Rebel::SQL.name(:foo), where: Rebel::SQL.name(:bar).in(Rebel::SQL.select(Rebel::SQL.name(:bar), from: Rebel::SQL.name(:foo)))).gsub(/\s+/, ' ').strip, 'SELECT * FROM "foo" WHERE "bar" IN ( SELECT "bar" FROM "foo" )')
   end

@@ -13,14 +13,16 @@ module Rebel::SQL
     exec(Rebel::SQL.drop_table(table_name))
   end
 
-  def select(*fields, distinct: distinct, from: nil, where: nil, inner: nil, left: nil, right: nil)
+  def select(*fields, distinct: distinct, from: nil, where: nil, inner: nil, left: nil, right: nil, limit: nil, offset: nil)
     exec(Rebel::SQL.select(*fields,
                            distinct: distinct,
                            from: from,
                            where: where,
                            inner: inner,
                            left: left,
-                           right: right))
+                           right: right,
+                           limit: limit,
+                           offset: offset))
   end
 
   def insert_into(table_name, *rows)
@@ -179,7 +181,7 @@ module Rebel::SQL
       SQL
     end
 
-    def select(*fields, distinct: nil, from: nil, where: nil, inner: nil, left: nil, right: nil)
+    def select(*fields, distinct: nil, from: nil, where: nil, inner: nil, left: nil, right: nil, limit: nil, offset: nil)
       raw <<-SQL
       SELECT #{distinct ? "DISTINCT #{names(*distinct)}" : names(*fields)}
       #{from?(from)}
@@ -187,6 +189,7 @@ module Rebel::SQL
       #{left?(left)}
       #{right?(right)}
       #{where?(where)}
+      #{limit?(limit, offset)}
       SQL
     end
 
@@ -349,6 +352,10 @@ module Rebel::SQL
 
     def right?(join)
       join ? "RIGHT #{join}" : nil
+    end
+
+    def limit?(limit, offset)
+      limit ? "LIMIT #{value(limit)}" << (offset ? " OFFSET #{offset}" : "") : nil
     end
   end
 end
