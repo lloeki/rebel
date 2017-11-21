@@ -180,7 +180,8 @@ module Rebel::SQL
 
     def select(*fields, from: nil, where: nil, inner: nil, left: nil, right: nil)
       raw <<-SQL
-      SELECT #{names(*fields)} FROM #{name(from)}
+      SELECT #{names(*fields)}
+      #{from?(from)}
       #{inner?(inner)}
       #{left?(left)}
       #{right?(right)}
@@ -327,6 +328,10 @@ module Rebel::SQL
         else raise NotImplementedError, e.class
         end
       end.join(' AND ')
+    end
+
+    def from?(from)
+      from ? "FROM #{name(from)}" : nil
     end
 
     def where?(*clause)
