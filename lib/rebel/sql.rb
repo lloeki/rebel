@@ -1,4 +1,4 @@
-module Rebel::SQL
+module Rebel::SQLQ
   attr_reader :conn
 
   def exec(query)
@@ -54,7 +54,9 @@ module Rebel::SQL
   def outer_join(table, on: nil)
     Rebel::SQL.outer_join(table, on: on)
   end
+end
 
+module Rebel
   class Raw < String
     def wants_parens!
       @wants_parens = true
@@ -67,7 +69,7 @@ module Rebel::SQL
     end
 
     def parens
-      Raw.new("(#{self})")
+      sql.raw("(#{self})")
     end
 
     def parens?
@@ -75,7 +77,7 @@ module Rebel::SQL
     end
 
     def as(n)
-      Raw.new(self + " AS #{Rebel::SQL.name(n)}")
+      sql.raw(self + " AS #{sql.name(n)}")
     end
 
     def as?(n)
@@ -83,7 +85,7 @@ module Rebel::SQL
     end
 
     def on(*clause)
-      Raw.new(self + " ON #{Rebel::SQL.and_clause(*clause)}")
+      sql.raw(self + " ON #{sql.and_clause(*clause)}")
     end
 
     def on?(*clause)
@@ -91,33 +93,33 @@ module Rebel::SQL
     end
 
     def having(*clause)
-      Raw.new(self + " HAVING #{Rebel::SQL.and_clause(*clause)}")
+      sql.raw(self + " HAVING #{sql.and_clause(*clause)}")
     end
 
     def asc
-      Raw.new(self + " ASC")
+      sql.raw(self + " ASC")
     end
 
     def desc
-      Raw.new(self + " DESC")
+      sql.raw(self + " DESC")
     end
 
     def and(*clause)
-      Raw.new("#{self.parens?} AND #{Rebel::SQL.and_clause(*clause)}")
+      sql.raw("#{self.parens?} AND #{sql.and_clause(*clause)}")
     end
     alias & and
 
     def or(*clause)
-      Raw.new("#{self} OR #{Rebel::SQL.and_clause(*clause)}").wants_parens!
+      sql.raw("#{self} OR #{sql.and_clause(*clause)}").wants_parens!
     end
     alias | or
 
     def eq(n)
       case n
       when nil
-        Raw.new("#{self} IS NULL")
+        sql.raw("#{self} IS NULL")
       else
-        Raw.new("#{self} = #{Rebel::SQL.name_or_value(n)}")
+        sql.raw("#{self} = #{sql.name_or_value(n)}")
       end
     end
     alias == eq
@@ -126,70 +128,60 @@ module Rebel::SQL
     def ne(n)
       case n
       when nil
-        Raw.new("#{self} IS NOT NULL")
+        sql.raw("#{self} IS NOT NULL")
       else
-        Raw.new("#{self} != #{Rebel::SQL.name_or_value(n)}")
+        sql.raw("#{self} != #{sql.name_or_value(n)}")
       end
     end
     alias != ne
     alias is_not ne
 
     def lt(n)
-      Raw.new("#{self} < #{Rebel::SQL.name_or_value(n)}")
+      sql.raw("#{self} < #{sql.name_or_value(n)}")
     end
     alias < lt
 
     def gt(n)
-      Raw.new("#{self} > #{Rebel::SQL.name_or_value(n)}")
+      sql.raw("#{self} > #{sql.name_or_value(n)}")
     end
     alias > gt
 
     def le(n)
-      Raw.new("#{self} <= #{Rebel::SQL.name_or_value(n)}")
+      sql.raw("#{self} <= #{sql.name_or_value(n)}")
     end
     alias <= le
 
     def ge(n)
-      Raw.new("#{self} >= #{Rebel::SQL.name_or_value(n)}")
+      sql.raw("#{self} >= #{sql.name_or_value(n)}")
     end
     alias >= ge
 
     def in(*v)
-      Raw.new("#{self} IN (#{Rebel::SQL.values(*v)})")
+      sql.raw("#{self} IN (#{sql.values(*v)})")
     end
 
     def not_in(*v)
-      Raw.new("#{self} NOT IN (#{Rebel::SQL.values(*v)})")
+      sql.raw("#{self} NOT IN (#{sql.values(*v)})")
     end
 
     def like(n)
-      Raw.new("#{self} LIKE #{Rebel::SQL.value(n)}")
+      sql.raw("#{self} LIKE #{sql.value(n)}")
     end
 
     def not_like(n)
-      Raw.new("#{self} NOT LIKE #{Rebel::SQL.value(n)}")
+      sql.raw("#{self} NOT LIKE #{sql.value(n)}")
+    end
+
+    private
+
+    def sql
+      @sql ||= Rebel::SQLQ
     end
   end
 
-  @identifier_quote = '"'
-  @string_quote = "'"
-  @escaped_string_quote = "''"
-
-  class << self
-    def identifier_quote=(str)
-      @identifier_quote = str
-    end
-
-    def string_quote=(str)
-      @string_quote = str
-    end
-
-    def escaped_string_quote=(str)
-      @escaped_string_quote = str
-    end
-
+  module SQLB
     def raw(str)
-      Raw.new(str)
+      Raw.new(str).tap { |r| r.instance_variable_set(:@sql, self) }
     end
 
     def create_table(table_name, desc)
@@ -309,15 +301,15 @@ module Rebel::SQL
     end
 
     def escape_str(str)
-      str.tr(@string_quote, @escaped_string_quote)
+      str.gsub(@string_quote, @escaped_string_quote)
     end
 
     def value(v)
       case v
       when Raw then v
-      when String then raw "'#{escape_str(v)}'"
+      when String then raw "#{@string_quote}#{escape_str(v)}#{@string_quote}"
       when Integer then raw v.to_s
-      when TrueClass, FalseClass then raw(v ? 'TRUE' : 'FALSE')
+      when TrueClass, FalseClass then raw(v ? @true_literal : @false_literal)
       when Date, Time, DateTime then value(v.iso8601)
       when nil then raw 'NULL'
       else raise NotImplementedError, "#{v.class}: #{v.inspect}"
@@ -397,4 +389,25 @@ module Rebel::SQL
       limit ? "LIMIT #{value(limit)}" << (offset ? " OFFSET #{offset}" : "") : nil
     end
   end
+end
+
+module Rebel
+  def self.SQL(options = {}, &block)
+    sql = const_defined?(:SQL) && options.empty? ? SQL : Module.new do
+      @identifier_quote = options[:identifier_quote] || '"'
+      @string_quote = options[:string_quote] || "'"
+      @escaped_string_quote = options[:escaped_string_quote] || "''"
+      @true_literal = options[:true_literal] || 'TRUE'
+      @false_literal = options[:false_literal] || 'FALSE'
+
+      extend Rebel::SQLB
+      include Rebel::SQLQ
+    end
+
+    return sql.instance_eval(&block) unless block.nil?
+
+    sql
+  end
+
+  SQL = SQL()
 end

@@ -4,7 +4,19 @@ require 'rebel'
 
 class TestRaw < Minitest::Test
   def assert_sql(expected, &actual)
-    assert_equal(expected.to_s, Rebel::SQL.instance_eval(&actual).to_s)
+    assert_equal(expected.to_s, Rebel::SQL(&actual).to_s)
+  end
+
+  def assert_mysql(expected, &actual)
+    assert_equal(expected.to_s, Rebel::SQL(identifier_quote: '`', string_quote: '"', escaped_string_quote: '""', &actual).to_s)
+  end
+
+  def assert_sqlite(expected, &actual)
+    assert_equal(expected.to_s, Rebel::SQL(true_literal: '1', false_literal: '0', &actual).to_s)
+  end
+
+  def assert_postgresql(expected, &actual)
+    assert_equal(expected.to_s, Rebel::SQL(&actual).to_s)
   end
 
   def test_and
@@ -112,6 +124,44 @@ class TestRaw < Minitest::Test
 
   def test_where_function
     assert_sql('WHERE COALESCE("foo", 0) = 42') { where?(function('COALESCE', :foo, 0).eq 42) }
+  end
+
+  def test_name
+    assert_sql('"foo"') { name(:foo) }
+    assert_mysql('`foo`') { name(:foo) }
+    assert_postgresql('"foo"') { name(:foo) }
+    assert_sqlite('"foo"') { name(:foo) }
+  end
+
+  def test_string
+    assert_sql("'FOO'") { value('FOO') }
+    assert_mysql('"FOO"') { value('FOO') }
+    assert_postgresql("'FOO'") { value('FOO') }
+    assert_sqlite("'FOO'") { value('FOO') }
+  end
+
+  def test_escaped_string
+    assert_sql("'FOO''BAR'") { value("FOO'BAR") }
+    assert_mysql('"FOO\'BAR"') { value("FOO'BAR") }
+    assert_postgresql("'FOO''BAR'") { value("FOO'BAR") }
+    assert_sqlite("'FOO''BAR'") { value("FOO'BAR") }
+
+    assert_sql("'FOO\"BAR'") { value('FOO"BAR') }
+    assert_mysql('"FOO""BAR"') { value('FOO"BAR') }
+    assert_postgresql("'FOO\"BAR'") { value('FOO"BAR') }
+    assert_sqlite("'FOO\"BAR'") { value('FOO"BAR') }
+  end
+
+  def test_boolean_literal
+    assert_sql("TRUE") { value(true) }
+    assert_mysql("TRUE") { value(true) }
+    assert_postgresql("TRUE") { value(true) }
+    assert_sqlite("1") { value(true) }
+
+    assert_sql("FALSE") { value(false) }
+    assert_mysql("FALSE") { value(false) }
+    assert_postgresql("FALSE") { value(false) }
+    assert_sqlite("0") { value(false) }
   end
 
   def test_value
