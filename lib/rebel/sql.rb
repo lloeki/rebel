@@ -13,7 +13,7 @@ module Rebel::SQL
     exec(Rebel::SQL.drop_table(table_name))
   end
 
-  def select(*fields, distinct: distinct, from: nil, where: nil, inner: nil, left: nil, right: nil, group: nil, order: nil, limit: nil, offset: nil)
+  def select(*fields, distinct: nil, from: nil, where: nil, inner: nil, left: nil, right: nil, group: nil, order: nil, limit: nil, offset: nil)
     exec(Rebel::SQL.select(*fields,
                            distinct: distinct,
                            from: from,
