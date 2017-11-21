@@ -284,7 +284,7 @@ module Rebel::SQL
       when TrueClass, FalseClass then raw(v ? 'TRUE' : 'FALSE')
       when Date, Time, DateTime then value(v.iso8601)
       when nil then raw 'NULL'
-      else raise NotImplementedError, v.inspect
+      else raise NotImplementedError, "#{v.class}: #{v.inspect}"
       end
     end
 
