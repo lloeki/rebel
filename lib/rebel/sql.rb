@@ -285,7 +285,8 @@ module Rebel
 
     ## Support
 
-    def name(name)
+    def name(name = nil)
+      super() if name.nil? # workaround for pry and introspection
       return name if name.is_a?(Raw)
       return raw('*') if name == '*'
 
@@ -402,6 +403,15 @@ module Rebel
 
       extend Rebel::SQLB
       include Rebel::SQLQ
+
+      def self.name(name = nil)
+        return "Rebel::SQL" if name.nil?
+        super
+      end
+
+      def self.inspect
+        "#<Rebel::SQL(#{instance_variables.map { |k| "#{k.to_s.sub(/^@/, '')}: #{instance_variable_get(k).inspect}" }.join(', ')})>"
+      end
     end
 
     return sql.instance_eval(&block) unless block.nil?
