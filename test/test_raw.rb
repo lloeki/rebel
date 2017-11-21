@@ -9,18 +9,29 @@ class TestRaw < Minitest::Test
 
   def test_and
     assert_sql('"foo" = 1 AND "bar" = 2') { name(:foo).eq(1).and(name(:bar).eq(2)) }
+    assert_sql('"foo" = 1 AND "bar" = 2') { name(:foo).eq(1) & name(:bar).eq(2) }
+    assert_sql('"foo" = 1 AND "bar" = 2') { (name(:foo) == 1) & (name(:bar) == 2) }
   end
 
   def test_or
     assert_sql('"foo" = 1 OR "bar" = 2') { name(:foo).eq(1).or(name(:bar).eq(2)) }
+    assert_sql('"foo" = 1 OR "bar" = 2') { name(:foo).eq(1) | name(:bar).eq(2) }
+    assert_sql('"foo" = 1 OR "bar" = 2') { (name(:foo) == 1) | (name(:bar) == 2) }
   end
 
   def test_and_or
     assert_sql('"foo" = 0 AND ("foo" = 1 OR "bar" = 2)') { name(:foo).eq(0).and(name(:foo).eq(1).or(name(:bar).eq(2))) }
+    assert_sql('"foo" = 0 AND ("foo" = 1 OR "bar" = 2)') { name(:foo).eq(0) & (name(:foo).eq(1) | name(:bar).eq(2)) }
   end
 
   def test_or_and_or
     assert_sql('("foo" = 1 OR "bar" = 2) AND ("foo" = 3 OR "bar" = 4)') { name(:foo).eq(1).or(name(:bar).eq(2)).and(name(:foo).eq(3).or(name(:bar).eq(4))) }
+    assert_sql('("foo" = 1 OR "bar" = 2) AND ("foo" = 3 OR "bar" = 4)') { (name(:foo).eq(1) | name(:bar).eq(2)) & (name(:foo).eq(3) | name(:bar).eq(4)) }
+  end
+
+  def test_and_or_and
+    assert_sql('"foo" = 1 AND "bar" = 2 OR "foo" = 3 AND "bar" = 4') { name(:foo).eq(1).and(name(:bar).eq(2)).or(name(:foo).eq(3).and(name(:bar).eq(4))) }
+    assert_sql('"foo" = 1 AND "bar" = 2 OR "foo" = 3 AND "bar" = 4') { name(:foo).eq(1) & name(:bar).eq(2) | name(:foo).eq(3) & name(:bar).eq(4) }
   end
 
   def test_is

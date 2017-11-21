@@ -105,10 +105,12 @@ module Rebel::SQL
     def and(*clause)
       Raw.new("#{self.parens?} AND #{Rebel::SQL.and_clause(*clause)}")
     end
+    alias & and
 
     def or(*clause)
       Raw.new("#{self} OR #{Rebel::SQL.and_clause(*clause)}").wants_parens!
     end
+    alias | or
 
     def eq(n)
       case n
