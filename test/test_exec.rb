@@ -44,6 +44,6 @@ class TestExec < Minitest::Test
   def test_select
     create_table :foo, id: 'INT', col: 'VARCHAR(255)'
     insert_into :foo, id: 1, col: 'whatevs'
-    assert_equal(select('*', from: :foo), [[1, 'whatevs']])
+    assert_equal(select(:*, from: :foo), [[1, 'whatevs']])
   end
 end

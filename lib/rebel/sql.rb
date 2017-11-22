@@ -288,7 +288,7 @@ module Rebel
     def name(name = nil)
       super() if name.nil? # workaround for pry and introspection
       return name if name.is_a?(Raw)
-      return raw('*') if name == '*'
+      return raw('*') if name == :*
 
       raw(name.to_s.split('.').map { |e| "#{@identifier_quote}#{e}#{@identifier_quote}" }.join('.'))
     end
