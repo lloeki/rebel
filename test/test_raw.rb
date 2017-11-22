@@ -48,19 +48,19 @@ class TestRaw < Minitest::Test
 
   def test_is
     assert_sql('"foo" IS NULL') { name(:foo).is(nil) }
-    assert_sql('"foo" = 42') { name(:foo).is(42) }
-    assert_sql('"foo" = "bar"') { name(:foo).is(name(:bar)) }
+    assert_sql('"foo" IS 42') { name(:foo).is(42) }
+    assert_sql('"foo" IS "bar"') { name(:foo).is(name(:bar)) }
   end
 
   def test_is_not
     assert_sql('"foo" IS NOT NULL') { name(:foo).is_not(nil) }
-    assert_sql('"foo" != 42') { name(:foo).is_not(42) }
-    assert_sql('"foo" != "bar"') { name(:foo).is_not(name(:bar)) }
+    assert_sql('"foo" IS NOT 42') { name(:foo).is_not(42) }
+    assert_sql('"foo" IS NOT "bar"') { name(:foo).is_not(name(:bar)) }
   end
 
   def test_eq
-    assert_sql('"foo" IS NULL') { name(:foo).eq(nil) }
-    assert_sql('"foo" IS NULL') { name(:foo) == nil }
+    assert_sql('"foo" = NULL') { name(:foo).eq(nil) }
+    assert_sql('"foo" = NULL') { name(:foo) == nil }
     assert_sql('"foo" = "bar"') { name(:foo).eq(name(:bar)) }
     assert_sql('"foo" = "bar"') { name(:foo) == name(:bar) }
   end
@@ -68,8 +68,8 @@ class TestRaw < Minitest::Test
   def test_ne
     assert_sql('"foo" != "bar"') { name(:foo).ne(name(:bar)) }
     assert_sql('"foo" != "bar"') { name(:foo) != name(:bar) }
-    assert_sql('"foo" IS NOT NULL') { name(:foo).ne(nil) }
-    assert_sql('"foo" IS NOT NULL') { name(:foo) != nil }
+    assert_sql('"foo" != NULL') { name(:foo).ne(nil) }
+    assert_sql('"foo" != NULL') { name(:foo) != nil }
   end
 
   def test_lt
@@ -112,6 +112,8 @@ class TestRaw < Minitest::Test
     assert_sql('WHERE "foo" = 1 AND "bar" = 2 AND "baz" = 3') { where?(foo: 1, bar: 2, baz: 3) }
     assert_sql('WHERE ("foo" = 1 OR "bar" = 2) AND "baz" = 3') { where?(name(:foo).eq(1).or(name(:bar).eq(2)), name(:baz).eq(3)) }
     assert_sql('WHERE ("foo" = 1 OR "bar" = 2)') { where?(name(:foo).eq(1).or(name(:bar).eq(2))) }
+    assert_sql('WHERE "foo" IS NULL') { where?(foo: nil) }
+    assert_sql('WHERE "foo" IN (1, 2, 3)') { where?(foo: [1, 2, 3]) }
   end
 
   def test_join

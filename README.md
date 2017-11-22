@@ -213,6 +213,60 @@ Rebel::SQL() { select count(:id).as(:count), from: :customers, where: { :age => 
 # While we're counting things, let's group results
 Rebel::SQL() { select count(:id).as(:count), :country, from: :customers, group: by(:country).having(count(:customer_id) => 5) }
 #=> SELECT COUNT("id") AS "count", "country" FROM "customers" GROUP BY "country" HAVING COUNT("customer_id") = 5
+
+# Passing a hash does a best effort to map Ruby to SQL
+Rebel::SQL() { select :id, from: :customers, where: { :age => 42 } }
+#=> SELECT "id" FROM "customers" WHERE "age" = 42
+Rebel::SQL() { select :id, from: :customers, where: { :age => [20, 21, 22] } }
+#=> SELECT "id" FROM "customers" WHERE "age" IN (20, 21, 22)
+Rebel::SQL() { select :id, from: :customers, where: { :age => nil } }
+#=> SELECT "id" FROM "customers" WHERE "age" IS NULL
+
+# Using operators ensures the expected SQL operator is used
+Rebel::SQL() { select :id, from: :customers, where: name(:age).eq(42) }
+#=> SELECT "id" FROM "customers" WHERE "age" = 42
+Rebel::SQL() { select :id, from: :customers, where: name(:age).eq(nil) }
+#=> SELECT "id" FROM "customers" WHERE "age" = NULL
+Rebel::SQL() { select :id, from: :customers, where: name(:age).ne(42) }
+#=> SELECT "id" FROM "customers" WHERE "age" != NULL
+Rebel::SQL() { select :id, from: :customers, where: name(:age).is(42) }
+#=> SELECT "id" FROM "customers" WHERE "age" IS 42
+Rebel::SQL() { select :id, from: :customers, where: name(:age).is(nil) }
+#=> SELECT "id" FROM "customers" WHERE "age" IS NULL
+Rebel::SQL() { select :id, from: :customers, where: name(:age).is_not(nil) }
+#=> SELECT "id" FROM "customers" WHERE "age" IS NOT NULL
+
+# Other operators are available
+Rebel::SQL() { select :id, from: :customers, where: name(:age).ge(42) }
+#=> SELECT "id" FROM "customers" WHERE "age" >= 42
+Rebel::SQL() { select :id, from: :customers, where: name(:age).in(21, 22, 23) }
+#=> SELECT "id" FROM "customers" WHERE "age" IN (21, 22, 23)
+Rebel::SQL() { select :id, from: :customers, where: name(:first_name).like("J%") }
+#=> SELECT "id" FROM "customers" WHERE "first_name" LIKE "J%"
+
+# Aliases to overload operators are available
+Rebel::SQL() { select :id, from: :customers, where: name(:age) == 42 }
+#=> SELECT "id" FROM "customers" WHERE "age" = 42
+Rebel::SQL() { select :id, from: :customers, where: name(:age) < 42 }
+#=> SELECT "id" FROM "customers" WHERE "age" < 42
+Rebel::SQL() { select :id, from: :customers, where: name(:age) >= 42 }
+#=> SELECT "id" FROM "customers" WHERE "age" >= 42
+Rebel::SQL() { select :id, from: :customers, where: name(:age) != 42 }
+#=> SELECT "id" FROM "customers" WHERE "age" != 42
+
+# Conditions can be combined
+Rebel::SQL() { select :id, from: :customers, where: name(:age).gt(42).or(name(:age).lt(21)) }
+#=> SELECT "id" FROM "customers" WHERE ("age" > 42 OR "age" < 21)
+Rebel::SQL() { select :id, from: :customers, where: (name(:age) < 42).and(name(:age) > 21) }
+#=> SELECT "id" FROM "customers" WHERE ("age" < 42 AND "age" > 21)
+
+# Binary-wise operators can be used to tie conditions
+# WARNING: Usefulness if this hack is still debated. It might be removed in the future.
+Rebel::SQL() { select :id, from: :customers, where: ((name(:age) > 42) | (name(:age) < 21)) }
+#=> SELECT "id" FROM "customers" WHERE ("age" > 42 OR "age" < 21)
+Rebel::SQL() { select :id, from: :customers, where: name(:age).lt(42) & (name(:age).gt(21)) }
+#=> SELECT "id" FROM "customers" WHERE ("age" < 42 AND "age" > 21)
+
 ```
 
 ### Query execution

@@ -117,26 +117,22 @@ module Rebel
     alias | or
 
     def eq(n)
-      case n
-      when nil
-        sql.raw("#{self} IS NULL")
-      else
-        sql.raw("#{self} = #{sql.name_or_value(n)}")
-      end
+      sql.raw("#{self} = #{sql.name_or_value(n)}")
     end
     alias == eq
-    alias is eq
+
+    def is(n)
+      sql.raw("#{self} IS #{sql.name_or_value(n)}")
+    end
 
     def ne(n)
-      case n
-      when nil
-        sql.raw("#{self} IS NOT NULL")
-      else
-        sql.raw("#{self} != #{sql.name_or_value(n)}")
-      end
+      sql.raw("#{self} != #{sql.name_or_value(n)}")
     end
     alias != ne
-    alias is_not ne
+
+    def is_not(n)
+      sql.raw("#{self} IS NOT #{sql.name_or_value(n)}")
+    end
 
     def lt(n)
       sql.raw("#{self} < #{sql.name_or_value(n)}")
@@ -343,6 +339,8 @@ module Rebel
       case right
       when Array
         name(left).in(*right)
+      when nil
+        name(left).is(name_or_value(right))
       else
         name(left).eq(name_or_value(right))
       end
