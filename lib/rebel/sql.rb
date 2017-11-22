@@ -1,3 +1,5 @@
+require 'date'
+
 module Rebel::SQLQ
   attr_reader :conn
 
