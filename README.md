@@ -21,13 +21,11 @@ No bullshit
 No layers
 No wrappers
 No smarty-pants
-No weird stance
 No sexy
+No nonsense
 No AST
 No lazy loading
 No crazy mapping
-No pretense
-No nonsense
 
 What you write is what you get: readable and obvious
 What you write is what you meant: tasty and delicious
