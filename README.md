@@ -7,7 +7,7 @@ You've been fighting yet another abstraction...
 Aren't you fed up with object-relation magic?
 But wait, here comes a humongous migration.
 Is ActiveRecord making you sick?
-To hell with that monstrous ARel expression!
+To hell with that monstrous Arel expression!
 Tell the truth, you were just wishing
 That it was as simple as a here-string.
 But could it keep some Ruby notation
@@ -42,7 +42,7 @@ point of such a layer is entirely defeated. Concatenating and interpolating
 only goes so far.
 
 As ActiveRecord grows, a significant decision has been taken in the Rails team
-to turn ARel into a library purely internal to ActiveRecord: the whole of it is
+to turn Arel into a library purely internal to ActiveRecord: the whole of it is
 basically considered internal and private, and only ActiveRecord's public
 interface should be used. Unfortunately, some highly dynamic, complex queries
 simply cannot be built using ActiveRecord, and concatenating strings to build
@@ -286,7 +286,7 @@ Yes. Just as you can write nonsensical SQL in SQL.
 That's not a question. You're welcome to implement one that does though, and if
 it leverages the visitor pattern, allocates a trajillion objects along the way
 and manages to produce invalid SQL in some corner cases, well congratulations
-for reimplementing ARel.
+for reimplementing Arel.
 
 ## License
 
