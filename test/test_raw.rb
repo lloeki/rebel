@@ -8,7 +8,7 @@ class TestRaw < Minitest::Test
   end
 
   def assert_mysql(expected, &actual)
-    assert_equal(expected.to_s, Rebel::SQL(identifier_quote: '`', string_quote: '"', escaped_string_quote: '""', &actual).to_s)
+    assert_equal(expected.to_s, Rebel::SQL(identifier_quote: '`', escaped_string_quote: "\\'", escaped_string_backslash: '\\', &actual).to_s)
   end
 
   def assert_sqlite(expected, &actual)
@@ -137,21 +137,31 @@ class TestRaw < Minitest::Test
 
   def test_string
     assert_sql("'FOO'") { value('FOO') }
-    assert_mysql('"FOO"') { value('FOO') }
+    assert_mysql("'FOO'") { value('FOO') }
     assert_postgresql("'FOO'") { value('FOO') }
     assert_sqlite("'FOO'") { value('FOO') }
   end
 
   def test_escaped_string
-    assert_sql("'FOO''BAR'") { value("FOO'BAR") }
-    assert_mysql('"FOO\'BAR"') { value("FOO'BAR") }
-    assert_postgresql("'FOO''BAR'") { value("FOO'BAR") }
-    assert_sqlite("'FOO''BAR'") { value("FOO'BAR") }
+    assert_sql        (%q('FOO''BAR'))   { value(%q(FOO'BAR))  }
+    assert_postgresql (%q('FOO''BAR'))   { value(%q(FOO'BAR))  }
+    assert_sqlite     (%q('FOO''BAR'))   { value(%q(FOO'BAR))  }
+    assert_mysql      (%q('FOO\'BAR'))   { value(%q(FOO'BAR))  }
 
-    assert_sql("'FOO\"BAR'") { value('FOO"BAR') }
-    assert_mysql('"FOO""BAR"') { value('FOO"BAR') }
-    assert_postgresql("'FOO\"BAR'") { value('FOO"BAR') }
-    assert_sqlite("'FOO\"BAR'") { value('FOO"BAR') }
+    assert_sql        (%q('FOO"BAR'))    { value(%q(FOO"BAR))  }
+    assert_postgresql (%q('FOO"BAR'))    { value(%q(FOO"BAR))  }
+    assert_sqlite     (%q('FOO"BAR'))    { value(%q(FOO"BAR))  }
+    assert_mysql      (%q('FOO"BAR'))    { value(%q(FOO"BAR))  }
+
+    assert_sql        (%q('FOO\BAR'))    { value(%q(FOO\BAR))  }
+    assert_postgresql (%q('FOO\BAR'))    { value(%q(FOO\BAR))  }
+    assert_sqlite     (%q('FOO\BAR'))    { value(%q(FOO\BAR))  }
+    assert_mysql      (%q('FOO\\BAR'))   { value(%q(FOO\BAR))  }
+
+    assert_sql        (%q('FOO\\''BAR')) { value(%q(FOO\'BAR)) }
+    assert_postgresql (%q('FOO\\''BAR')) { value(%q(FOO\'BAR)) }
+    assert_sqlite     (%q('FOO\\''BAR')) { value(%q(FOO\'BAR)) }
+    assert_mysql      (%q('FOO\\\'BAR')) { value(%q(FOO\'BAR)) }
   end
 
   def test_boolean_literal

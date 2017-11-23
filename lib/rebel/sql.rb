@@ -292,7 +292,10 @@ module Rebel
     end
 
     def escape_str(str)
-      str.gsub(@string_quote, @escaped_string_quote)
+      str.dup.tap do |s|
+        s.gsub!('\\') { @escaped_string_backslash } if @escaped_string_backslash
+        s.gsub!(@string_quote) { @escaped_string_quote }
+      end
     end
 
     def value(v)
@@ -390,6 +393,7 @@ module Rebel
       @identifier_quote = options[:identifier_quote] || '"'
       @string_quote = options[:string_quote] || "'"
       @escaped_string_quote = options[:escaped_string_quote] || "''"
+      @escaped_string_backslash = options[:escaped_string_backslash]
       @true_literal = options[:true_literal] || 'TRUE'
       @false_literal = options[:false_literal] || 'FALSE'
 
