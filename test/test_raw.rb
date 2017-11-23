@@ -155,15 +155,15 @@ class TestRaw < Minitest::Test
   end
 
   def test_boolean_literal
-    assert_sql("TRUE") { value(true) }
-    assert_mysql("TRUE") { value(true) }
-    assert_postgresql("TRUE") { value(true) }
-    assert_sqlite("1") { value(true) }
+    assert_sql('TRUE') { value(true) }
+    assert_mysql('TRUE') { value(true) }
+    assert_postgresql('TRUE') { value(true) }
+    assert_sqlite('1') { value(true) }
 
-    assert_sql("FALSE") { value(false) }
-    assert_mysql("FALSE") { value(false) }
-    assert_postgresql("FALSE") { value(false) }
-    assert_sqlite("0") { value(false) }
+    assert_sql('FALSE') { value(false) }
+    assert_mysql('FALSE') { value(false) }
+    assert_postgresql('FALSE') { value(false) }
+    assert_sqlite('0') { value(false) }
   end
 
   def test_value
