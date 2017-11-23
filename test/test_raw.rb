@@ -179,7 +179,7 @@ class TestRaw < Minitest::Test
   end
 
   def test_select
-    assert_sql('SELECT * FROM "foo"') { select(raw('*'), from: name(:foo)).gsub(/\s+/, ' ').strip }
+    assert_sql('SELECT * FROM "foo"') { select(raw('*'), from: name(:foo)) }
   end
 
   def test_select_without_from
@@ -187,50 +187,50 @@ class TestRaw < Minitest::Test
   end
 
   def test_select_distinct
-    assert_sql('SELECT DISTINCT "bar" FROM "foo"') { select(distinct: :bar, from: :foo).gsub(/\s+/, ' ').strip }
+    assert_sql('SELECT DISTINCT "bar" FROM "foo"') { select(distinct: :bar, from: :foo) }
   end
 
   def test_select_distinct_multiple
-    assert_sql('SELECT DISTINCT "bar", "baz" FROM "foo"') { select(distinct: [:bar, :baz], from: :foo).gsub(/\s+/, ' ').strip }
+    assert_sql('SELECT DISTINCT "bar", "baz" FROM "foo"') { select(distinct: [:bar, :baz], from: :foo) }
   end
 
   def test_select_group_by
-    assert_sql('SELECT "bar" FROM "foo" GROUP BY "baz"') { select(:bar, from: :foo, group: by(:baz)).gsub(/\s+/, ' ').strip }
+    assert_sql('SELECT "bar" FROM "foo" GROUP BY "baz"') { select(:bar, from: :foo, group: by(:baz)) }
   end
 
   def test_select_group_by_having
-    assert_sql('SELECT "bar" FROM "foo" GROUP BY "baz" HAVING COUNT("qux") > 5') { select(:bar, from: :foo, group: by(:baz).having(count(:qux).gt(5))).gsub(/\s+/, ' ').strip }
+    assert_sql('SELECT "bar" FROM "foo" GROUP BY "baz" HAVING COUNT("qux") > 5') { select(:bar, from: :foo, group: by(:baz).having(count(:qux).gt(5))) }
   end
 
   def test_select_order_by
-    assert_sql('SELECT "bar" FROM "foo" ORDER BY "baz"') { select(:bar, from: :foo, order: by(:baz)).gsub(/\s+/, ' ').strip }
+    assert_sql('SELECT "bar" FROM "foo" ORDER BY "baz"') { select(:bar, from: :foo, order: by(:baz)) }
   end
 
   def test_select_order_by_asc
-    assert_sql('SELECT "bar" FROM "foo" ORDER BY "baz" ASC') { select(:bar, from: :foo, order: by(:baz).asc).gsub(/\s+/, ' ').strip }
+    assert_sql('SELECT "bar" FROM "foo" ORDER BY "baz" ASC') { select(:bar, from: :foo, order: by(:baz).asc) }
   end
 
   def test_select_order_by_desc
-    assert_sql('SELECT "bar" FROM "foo" ORDER BY "baz" DESC') { select(:bar, from: :foo, order: by(:baz).desc).gsub(/\s+/, ' ').strip }
+    assert_sql('SELECT "bar" FROM "foo" ORDER BY "baz" DESC') { select(:bar, from: :foo, order: by(:baz).desc) }
   end
 
   def test_select_multiple_order_by
-    assert_sql('SELECT "bar" FROM "foo" ORDER BY "baz", "qux"') { select(:bar, from: :foo, order: by(:baz, :qux)).gsub(/\s+/, ' ').strip }
+    assert_sql('SELECT "bar" FROM "foo" ORDER BY "baz", "qux"') { select(:bar, from: :foo, order: by(:baz, :qux)) }
   end
 
   def test_select_multiple_order_by_opposing
-    assert_sql('SELECT "bar" FROM "foo" ORDER BY "baz" ASC, "qux" DESC') { select(:bar, from: :foo, order: by(name(:baz).asc, name(:qux).desc)).gsub(/\s+/, ' ').strip }
+    assert_sql('SELECT "bar" FROM "foo" ORDER BY "baz" ASC, "qux" DESC') { select(:bar, from: :foo, order: by(name(:baz).asc, name(:qux).desc)) }
   end
 
   def test_select_limit
-    assert_sql('SELECT "bar" FROM "foo" LIMIT 10') { select(:bar, from: :foo, limit: 10).gsub(/\s+/, ' ').strip }
+    assert_sql('SELECT "bar" FROM "foo" LIMIT 10') { select(:bar, from: :foo, limit: 10) }
   end
 
   def test_select_offset
-    assert_sql('SELECT "bar" FROM "foo" LIMIT 10 OFFSET 20') { select(:bar, from: :foo, limit: 10, offset: 20).gsub(/\s+/, ' ').strip }
+    assert_sql('SELECT "bar" FROM "foo" LIMIT 10 OFFSET 20') { select(:bar, from: :foo, limit: 10, offset: 20) }
   end
 
   def test_nested_select
-    assert_sql('SELECT * FROM "foo" WHERE "bar" IN ( SELECT "bar" FROM "foo" )') { select(raw('*'), from: name(:foo), where: name(:bar).in(select(name(:bar), from: name(:foo)))).gsub(/\s+/, ' ').strip }
+    assert_sql('SELECT * FROM "foo" WHERE "bar" IN (SELECT "bar" FROM "foo")') { select(raw('*'), from: name(:foo), where: name(:bar).in(select(name(:bar), from: name(:foo)))) }
   end
 end

@@ -183,67 +183,59 @@ module Rebel
     end
 
     def create_table(table_name, desc)
-      raw <<-SQL
-      CREATE TABLE #{name(table_name)} (
-        #{list(desc.map { |k, v| "#{name(k)} #{v}" })}
-      )
-      SQL
+      raw %[CREATE TABLE #{name(table_name)} (#{list(desc.map { |k, v| "#{name(k)} #{v}" })})]
     end
 
     def drop_table(table_name)
-      raw <<-SQL
-      DROP TABLE #{name(table_name)}
-      SQL
+      raw "DROP TABLE #{name(table_name)}"
     end
 
     def select(*fields, distinct: nil, from: nil, where: nil, inner: nil, left: nil, right: nil, group: nil, order: nil, limit: nil, offset: nil)
-      raw <<-SQL
-      SELECT #{distinct ? "DISTINCT #{names(*distinct)}" : names(*fields)}
-      #{from?(from)}
-      #{inner?(inner)}
-      #{left?(left)}
-      #{right?(right)}
-      #{where?(where)}
-      #{group?(group)}
-      #{order?(order)}
-      #{limit?(limit, offset)}
-      SQL
+      raw [
+        "SELECT #{distinct ? "DISTINCT #{names(*distinct)}" : names(*fields)}",
+        from?(from),
+        inner?(inner),
+        left?(left),
+        right?(right),
+        where?(where),
+        group?(group),
+        order?(order),
+        limit?(limit, offset),
+      ].compact.join(' ')
     end
 
     def insert_into(table_name, *rows)
-      raw <<-SQL
-      INSERT INTO #{name(table_name)} (#{names(*rows.first.keys)})
-      VALUES #{list(rows.map { |r| "(#{values(*r.values)})" })}
-      SQL
+      raw [
+        "INSERT INTO #{name(table_name)} (#{names(*rows.first.keys)})",
+        "VALUES #{list(rows.map { |r| "(#{values(*r.values)})" })}",
+      ].join(' ')
     end
 
     def update(table_name, set: nil, where: nil, inner: nil, left: nil, right: nil)
       raise ArgumentError if set.nil?
 
-      raw <<-SQL
-      UPDATE #{name(table_name)}
-      SET #{assign_clause(set)}
-      #{inner?(inner)}
-      #{left?(left)}
-      #{right?(right)}
-      #{where?(where)}
-      SQL
+      raw [
+        "UPDATE #{name(table_name)}",
+        "SET #{assign_clause(set)}",
+        inner?(inner),
+        left?(left),
+        right?(right),
+        where?(where),
+      ].compact.join(' ')
     end
 
     def delete_from(table_name, where: nil, inner: nil, left: nil, right: nil)
-      raw <<-SQL
-      DELETE FROM #{name(table_name)}
-      #{inner?(inner)}
-      #{left?(left)}
-      #{right?(right)}
-      #{where?(where)}
-      SQL
+      raw [
+        "DELETE FROM #{name(table_name)}",
+        inner?(inner),
+        left?(left),
+        right?(right),
+        where?(where),
+      ].join(' ')
     end
 
     def truncate(table_name)
-      raw <<-SQL
-      TRUNCATE #{name(table_name)}
-      SQL
+      raw "TRUNCATE #{name(table_name)}"
     end
 
     ## Functions
