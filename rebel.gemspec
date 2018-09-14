@@ -7,5 +7,5 @@ Gem::Specification.new do |s|
   s.authors     = ['Loic Nageleisen']
   s.email       = 'loic.nageleisen@gmail.com'
   s.files       = Dir['lib/**/*.rb']
-  s.homepage    = 'https://github.com/lloeki/rebel.git'
+  s.homepage    = 'https://gitlab.com/lloeki/rebel.git'
 end
